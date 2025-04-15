@@ -116,7 +116,7 @@ function incrementPlayNumber() {
     
     if (!playData) {
         playData = {
-            base: 180,
+            base: 1,
             increment: 0
         };
     } else {
