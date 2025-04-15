@@ -31,13 +31,16 @@ let correctAnswers = {};
 
 // Initialize the quiz when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
+    // Get form data from localStorage
+    const formData = JSON.parse(localStorage.getItem('formData') || {});
+    
     // Set image folder based on user data
-    const userAge = localStorage.getItem("userAge");
-    const userProfession = localStorage.getItem("userProfession");
+    const userAge = formData.age || localStorage.getItem("userAge");
+    const userProfession = formData.profession || localStorage.getItem("userProfession");
 
     if (userAge !== null && userProfession !== null) {
         const age = parseInt(userAge);
-        if (userProfession !== "engineer") {
+        if (userProfession.toLowerCase() !== "engineer") {
             if (age >= 0 && age <= 18) {
                 imageFolder = "Img18";
             } else if (age >= 19 && age <= 60) {
@@ -64,20 +67,21 @@ document.addEventListener("DOMContentLoaded", function () {
     updateQuestion();
     
     // Initialize player data in localStorage if not exists
-    initPlayerData();
+    initPlayerData(formData);
 });
 
 // Initialize player data in localStorage
-function initPlayerData() {
+function initPlayerData(formData) {
     if (!localStorage.getItem('playerData')) {
         const playerData = {
-            playerId: generatePlayerId(),
+            playerId: formData.playerId || generatePlayerId(),
             scores: [],
             sessions: [],
             attempts: 0,
             formData: {
-                age: localStorage.getItem("userAge") || null,
-                profession: localStorage.getItem("userProfession") || null
+                age: formData.age || null,
+                profession: formData.profession || null,
+                status: formData.status || null
             }
         };
         localStorage.setItem('playerData', JSON.stringify(playerData));
@@ -360,16 +364,21 @@ function endQuiz() {
         };
     });
 
+    // Get form data from localStorage
+    const formData = JSON.parse(localStorage.getItem('formData') || {});
+
     const quizData = {
         timestamp: new Date().toISOString(),
-        age: localStorage.getItem("userAge") || "unknown",
-        profession: localStorage.getItem("userProfession") || "unknown",
+        age: formData.age || "unknown",
+        profession: formData.profession || "unknown",
+        status: formData.status || "unknown",
         score: score,
         answers: answersReport,
         timeTaken: timeTaken,
         sessionId: sessionId,
         playNumber: playNumber,
-        imageSet: imageSet
+        imageSet: imageSet,
+        playerId: formData.playerId || generatePlayerId()
     };
 
     // Store quiz data in localStorage
@@ -395,7 +404,17 @@ function endQuiz() {
 // Store quiz data in localStorage
 function storeQuizData(quizData) {
     // Get existing player data
-    const playerData = JSON.parse(localStorage.getItem('playerData'));
+    const playerData = JSON.parse(localStorage.getItem('playerData')) || {
+        playerId: quizData.playerId,
+        scores: [],
+        sessions: [],
+        attempts: 0,
+        formData: {
+            age: quizData.age,
+            profession: quizData.profession,
+            status: quizData.status
+        }
+    };
     
     // Update player data with new quiz results
     playerData.scores.push(quizData.score);
@@ -414,7 +433,6 @@ function storeQuizData(quizData) {
     localStorage.setItem('quizPerformance', JSON.stringify(quizData));
 }
 
-// Add this function to your quiz.js file
 function sendDataToGoogleSheets(quizData) {
     // Prepare the data for submission
     const formData = new URLSearchParams();
@@ -425,8 +443,10 @@ function sendDataToGoogleSheets(quizData) {
     formData.append('playNumber', quizData.playNumber);
     formData.append('age', quizData.age);
     formData.append('profession', quizData.profession);
+    formData.append('status', quizData.status);
     formData.append('score', quizData.score);
     formData.append('timeTaken', quizData.timeTaken);
+    formData.append('playerId', quizData.playerId);
     
     // Add answers and confidence levels
     for (let i = 0; i < totalQuestions; i++) {
@@ -435,10 +455,6 @@ function sendDataToGoogleSheets(quizData) {
         formData.append(`q${i+1}_confidence`, userConfidence[i] || '');
         formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i]) ? '1' : '0');
     }
-    
-    // Get player ID from localStorage
-    const playerData = JSON.parse(localStorage.getItem('playerData') || '{}');
-    formData.append('playerId', playerData.playerId || generatePlayerId());
     
     // Send data to Google Sheets
     fetch('https://script.google.com/macros/s/AKfycbyXbr3n2AXR3NIqKhrc82cbju5YkFZtq_zn-6T3NrarE6jNkURzrjnFiRY2ovREC_kx/exec', {
@@ -492,6 +508,8 @@ function setupEventListeners() {
 }
 
 function finishGame() {
+    // Clear the form data from localStorage if no longer needed
+    localStorage.removeItem('formData');
     window.location.href = "photo-learning.html";
 }
 

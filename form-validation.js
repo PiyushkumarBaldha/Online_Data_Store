@@ -32,13 +32,23 @@ document.addEventListener("DOMContentLoaded", function() {
             // Generate a simple player ID (timestamp + random number)
             const playerId = Date.now() + Math.floor(Math.random() * 1000);
             
+            // Store form data in localStorage
+            const formData = {
+                profession: professionInput.value,
+                age: ageInput.value,
+                status: statusInput.value,
+                playerId: playerId,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('formData', JSON.stringify(formData));
+
             // Prepare form data as URL parameters
-            const formData = new URLSearchParams();
-            formData.append('timestamp', new Date().toISOString());
-            formData.append('playerId', playerId);
-            formData.append('profession', professionInput.value);
-            formData.append('age', ageInput.value);
-            formData.append('status', statusInput.value);
+            const postData = new URLSearchParams();
+            postData.append('timestamp', new Date().toISOString());
+            postData.append('playerId', playerId);
+            postData.append('profession', professionInput.value);
+            postData.append('age', ageInput.value);
+            postData.append('status', statusInput.value);
 
             // Show loading state
             submitBtn.disabled = true;
@@ -47,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Send data to Google Sheets
             fetch('https://script.google.com/macros/s/AKfycbyWmDXXrwaYWvSAlistn1baK7FwhuMYiUhRAtEEij2Y1We0ybMkGcIZU6HcxjVUHY8Rzw/exec', {
                 method: 'POST',
-                body: formData
+                body: postData
             })
             .then(response => response.json())
             .then(data => {
