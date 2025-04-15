@@ -441,7 +441,7 @@ function sendDataToGoogleSheets(quizData) {
     formData.append('playerId', playerData.playerId || generatePlayerId());
     
     // Send data to Google Sheets
-    fetch('https://script.google.com/macros/s/AKfycbwFPNCvyHT84BpuKJiwbItYG2EtmirSGt9RwsCxBlRhhsKIV93GJbkPG4gfAJ6_lh4h/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbyXbr3n2AXR3NIqKhrc82cbju5YkFZtq_zn-6T3NrarE6jNkURzrjnFiRY2ovREC_kx/exec', {
         method: 'POST',
         body: formData
     })

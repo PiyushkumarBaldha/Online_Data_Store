@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
             submitBtn.textContent = "Submitting...";
 
             // Send data to Google Sheets
-            fetch('https://script.google.com/macros/s/AKfycbx6VJxfGM61Ro1tD1QIxeCu5Vsho0FW2eXyaQG-1Ciyb-OtKDNB-Sfc0m8Jle3HRG6-/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbyWmDXXrwaYWvSAlistn1baK7FwhuMYiUhRAtEEij2Y1We0ybMkGcIZU6HcxjVUHY8Rzw/exec', {
                 method: 'POST',
                 body: formData
             })
