@@ -92,6 +92,62 @@ function generatePlayerId() {
     return 'player_' + Math.random().toString(36).substr(2, 9);
 }
 
+function getPlayNumber() {
+    let playData = localStorage.getItem('playNumberData');
+    
+    if (!playData) {
+        // Initialize with whole number if no data exists
+        playData = {
+            base: 180,
+            increment: 0
+        };
+    } else {
+        playData = JSON.parse(playData);
+    }
+    
+    // Format as "base.increment"
+    const currentNumber = `${playData.base}.${playData.increment}`;
+    
+    return currentNumber;
+}
+
+function incrementPlayNumber() {
+    let playData = localStorage.getItem('playNumberData');
+    
+    if (!playData) {
+        playData = {
+            base: 180,
+            increment: 0
+        };
+    } else {
+        playData = JSON.parse(playData);
+    }
+    
+    // Increment the decimal part for "Play Again"
+    playData.increment += 1;
+    
+    localStorage.setItem('playNumberData', JSON.stringify(playData));
+}
+
+function resetPlayNumber() {
+    let playData = localStorage.getItem('playNumberData');
+    
+    if (!playData) {
+        playData = {
+            base: 1,
+            increment: 0
+        };
+    } else {
+        playData = JSON.parse(playData);
+    }
+    
+    // Increment the whole number and reset decimal for "Finish"
+    playData.base += 1;
+    playData.increment = 0;
+    
+    localStorage.setItem('playNumberData', JSON.stringify(playData));
+}
+
 // Initialize the randomized image set with complete shuffling
 function initializeImageSet() {
     // Total number of images available in each folder
@@ -479,17 +535,6 @@ function generateSessionId() {
     return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 }
 
-function getPlayNumber() {
-    let playNumber = localStorage.getItem('playNumber');
-    if (!playNumber) {
-        playNumber = 1;
-    } else {
-        playNumber = parseInt(playNumber) + 1;
-    }
-    localStorage.setItem('playNumber', playNumber);
-    return playNumber;
-}
-
 function setGradientBackground() {
     const randomIndex = Math.floor(Math.random() * colors.length);
     const gradient = `linear-gradient(to bottom, ${colors[randomIndex][0]}, ${colors[randomIndex][1]})`;
@@ -507,17 +552,19 @@ function setupEventListeners() {
     document.getElementById("review-btn").addEventListener("click", showReviewScreen);
 }
 
-function finishGame() {
-    // Clear the form data from localStorage if no longer needed
-    localStorage.removeItem('formData');
-    window.location.href = "photo-learning.html";
-}
-
 function playAgain() {
+    incrementPlayNumber();
     let attempt = parseInt(localStorage.getItem("attempt") || "1", 10);
     attempt++;
     localStorage.setItem("attempt", attempt);
     window.location.reload();
+}
+
+function finishGame() {
+    resetPlayNumber();
+    // Clear the form data from localStorage if no longer needed
+    localStorage.removeItem('formData');
+    window.location.href = "photo-learning.html";
 }
 
 // Make functions available in global scope for HTML onclick handlers
