@@ -18,7 +18,7 @@ let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
 let sessionId = generateSessionId();
-let playNumber = getPlayNumber();
+let playNumber = getPlayNumber(1);
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
@@ -98,7 +98,7 @@ function getPlayNumber() {
     if (!playData) {
         // Initialize with whole number if no data exists
         playData = {
-            base: 180,
+            base: 1,
             increment: 0
         };
     } else {

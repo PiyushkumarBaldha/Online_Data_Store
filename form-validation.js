@@ -52,30 +52,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Show loading state
             submitBtn.disabled = true;
-            submitBtn.textContent = "Submitting...";
-
-            // Send data to Google Sheets
-            fetch('https://script.google.com/macros/s/AKfycbyWmDXXrwaYWvSAlistn1baK7FwhuMYiUhRAtEEij2Y1We0ybMkGcIZU6HcxjVUHY8Rzw/exec', {
-                method: 'POST',
-                body: postData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Store player ID in session storage
-                    sessionStorage.setItem('playerId', data.playerId);
-                    // Redirect to quiz page
-                    window.location.href = "quiz.html";
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error submitting form: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Submit";
-            });
+            window.location.href = "quiz.html";
+        
+        
         }
     });
 });
