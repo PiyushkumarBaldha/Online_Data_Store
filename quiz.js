@@ -1,15 +1,15 @@
 // Quiz Configuration
 const colors = [
-    ["#f79c99", "#f7d7d2"],
-    ["#a2f7a2", "#d7f7d2"],
-    ["#a2a2f7", "#d2d7f7"],
-    ["#f7f7a2", "#f7f7c7"],
-    ["#a2f7c7", "#d2f7d7"],
-    ["#a2c7f7", "#d2d7f7"],
-    ["#f7c7a2", "#f7d2c7"],
-    ["#c7f7a2", "#d2f7a2"],
-    ["#a2a2c7", "#d7d7f7"],
-    ["#c7a2f7", "#d2c7f7"],
+    ["#0f0c29", "#302b63"],
+    ["#1a1a2e", "#16213e"],
+    ["#1f005c", "#5b0060"],
+    ["#070024", "#2c005b"],
+    ["#0f2027", "#203a43"],
+    ["#1a2a6c", "#b21f1f"],
+    ["#3a1c71", "#d76d77"],
+    ["#200122", "#6f0000"],
+    ["#0f0c29", "#24243e"],
+    ["#000428", "#004e92"]
 ];
 
 // Quiz Variables
@@ -18,7 +18,7 @@ let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
 let sessionId = generateSessionId();
-let playNumber = getPlayNumber(1);
+let playNumber = getPlayNumber();
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
@@ -101,14 +101,13 @@ function getPlayNumber() {
             base: 1,
             increment: 0
         };
+        localStorage.setItem('playNumberData', JSON.stringify(playData));
     } else {
         playData = JSON.parse(playData);
     }
     
     // Format as "base.increment"
-    const currentNumber = `${playData.base}.${playData.increment}`;
-    
-    return currentNumber;
+    return `${playData.base}.${playData.increment}`;
 }
 
 function incrementPlayNumber() {
@@ -265,7 +264,7 @@ function checkAnswer(isReal) {
     updateProgress();
     
     // Auto-proceed if confidence already selected
-    if (currentConfidence !== null) {
+    if (userConfidence[currentQuestionIndex] !== null) {
         goToNextQuestion();
     }
 }
@@ -297,22 +296,34 @@ function updateConfidenceButtons() {
 }
 
 function goToNextQuestion() {
-    let nextIndex = findNextUnanswered(currentQuestionIndex);
-    if (nextIndex !== -1) {
-        currentQuestionIndex = nextIndex;
-        currentConfidence = userConfidence[nextIndex]; // Load confidence for next question
-        updateQuestion();
+    // First check if we have both answer and confidence
+    if (userAnswers[currentQuestionIndex] !== null && userConfidence[currentQuestionIndex] !== null) {
+        let nextIndex = findNextUnanswered(currentQuestionIndex);
+        
+        if (nextIndex !== -1) {
+            currentQuestionIndex = nextIndex;
+            currentConfidence = userConfidence[nextIndex];
+            updateQuestion();
+        } else {
+            // All questions answered - enable review button
+            document.getElementById("review-btn").disabled = false;
+            // Show review screen automatically when all questions are answered
+            showReviewScreen();
+        }
     } else {
-        showReviewScreen();
+        // Show alert if missing answer or confidence
+        alert("Please select both an answer and confidence level before proceeding.");
     }
 }
 
 function findNextUnanswered(current) {
+    // First look ahead
     for (let i = current + 1; i < totalQuestions; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
+    // Then look from the beginning
     for (let i = 0; i < current; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
     return -1;
 }
@@ -369,25 +380,8 @@ function showReviewScreen() {
 
 function changeAnswer(index, answer) {
     userAnswers[index] = answer;
-    
-    // Update the answer display
-    const answerDisplay = document.querySelectorAll(".review-answer")[index];
-    answerDisplay.textContent = `Your answer: ${answer}`;
-    
-    // Update navigation button (just make it blue)
-    const navButtons = document.querySelectorAll(".nav-btn");
-    if (navButtons.length > 0) {
-        navButtons[index].classList.remove("correct", "incorrect");
-        navButtons[index].classList.add("answered");
-    }
-    
-    // Recalculate score
-    score = 0;
-    userAnswers.forEach((ans, i) => {
-        if (ans === correctAnswers[i]) {
-            score += 10;
-        }
-    });
+    // Re-render the review screen to show updated answer
+    showReviewScreen();
 }
 
 function submitFinalAnswers() {

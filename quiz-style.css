@@ -1,15 +1,25 @@
+/* Quiz.css - Updated with Matching Colors and Animations */
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #f79c99, #f7d7d2);
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63);
     display: flex;
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
     margin: 0;
     padding: 20px;
-    transition: background-color 0.5s ease;
+    color: #fff;
     flex-direction: column;
     overflow-y: auto;
+}
+
+/* Particles Background */
+.particles {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></svg>');
+    z-index: -1;
 }
 
 /* Navigation */
@@ -27,28 +37,37 @@ body {
 #timer {
     font-size: 20px;
     font-weight: bold;
-    color: #333;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Navigation Buttons */
 #question-nav {
-    display: auto;
+    display: flex;
     flex-wrap: wrap;
-    justify-content: center;  
-    background-color: #ddd; 
-    border-radius:10px;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
 }
 
 .nav-btn {
-    background-color: yellow;
-    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 10px;
-    border-radius: 40%;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 30px;
     transform: perspective(1px) translateZ(0);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    font-family: 'Poppins', sans-serif;
 }
 
 .nav-btn:not(.answered) {
@@ -56,14 +75,19 @@ body {
 }
 
 .nav-btn.answered {
-    background-color: #2196F3;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
     color: white;
-    box-shadow: 0 0 10px rgba(33, 150, 243, 0.7);
+    box-shadow: 0 0 10px rgba(229, 46, 113, 0.4);
+    border: none;
 }
 
 .nav-btn:hover {
     transform: scale(1.1) perspective(1px) translateZ(0);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-btn.answered:hover {
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
 }
 
 @keyframes pulse {
@@ -74,29 +98,32 @@ body {
 
 /* Quiz Container */
 .quiz-container {
-    background: white;
-    padding: 20px;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 25px;
     border-radius: 15px;
     width: 90%;
     max-width: 600px;
     text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    position: relative;
-    transition: background 0.5s ease;
-    animation: fadeIn 1s ease-in-out;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     margin: 20px auto;
-    overflow: visible;
+    animation: fadeIn 0.5s ease-out;
 }
 
 #question-title {
     margin: 10px;
     position: relative;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 #score-container {
     margin: 5px;
     text-align: right;
     position: relative;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
 }
 
 /* Image */
@@ -105,9 +132,9 @@ body {
     max-height: 60vh;
     object-fit: contain;
     border-radius: 10px;
-    margin: 10px 0;
+    margin: 15px 0;
     transition: all 0.3s ease;
-    border: 3px solid white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -119,23 +146,20 @@ body {
 /* Progress Bar */
 #progress-bar {
     width: 100%;
-    background-color: #e0e0e0;
-    height: 25px;
-    border-radius: 12px;
-    margin-top: 15px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.12);
+    height: 18px;
+    border-radius: 6px;
+    margin-top: 20px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
 
 #progress-bar-filled {
     height: 100%;
-    background: linear-gradient(90deg, #2196F3, #64B5F6);
-    border-radius: 10px;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
+    border-radius: 6px;
     width: 0%;
-    text-align: center;
-    color: white;
-    line-height: 25px;
-    transition: width 0.5s ease-in-out, background-color 0.3s ease;
+    transition: width 0.5s ease-in-out;
     position: relative;
 }
 
@@ -175,44 +199,57 @@ body {
 }
 
 #Choose-Ans-h3 {
-    margin: 15px 0px 5px;
+    margin: 15px 0 10px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .answer-btn {
-    padding: 15px 20px;
-    font-size: 18px;
+    padding: 14px 20px;
+    font-size: 1rem;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     width: 45%;
     transition: all 0.3s ease;
-    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .answer-btn.selected {
-    border: 3px solid #000;
-    font-weight: bold;
+    border: 2px solid white;
+    font-weight: 600;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 #real-btn {
-    background-color: #4caf50;
+    background: rgba(76, 175, 80, 0.7);
 }
 
 #real-btn:hover:not(.selected) {
-    background-color: #388e3c;
+    background: rgba(76, 175, 80, 0.9);
+    transform: translateY(-2px);
 }
 
 #fake-btn {
-    background-color: #ff9800;
+    background: rgba(255, 152, 0, 0.7);
 }
 
 #fake-btn:hover:not(.selected) {
-    background-color: #f57c00;
+    background: rgba(255, 152, 0, 0.9);
+    transform: translateY(-2px);
 }
 
 #confidence-h3 {
-    margin: 15px 0px 5px;
+    margin: 20px 0 10px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 /* Confidence Buttons */
@@ -226,25 +263,30 @@ body {
 
 .confidence-btn {
     padding: 12px;
-    font-size: 16px;
+    font-size: 0.9rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     width: 30%;
     min-width: 110px;
     transition: all 0.3s ease;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     position: relative;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .confidence-btn.selected {
-    border: 3px solid #000;
-    font-weight: bold;
+    border: 2px solid white;
+    font-weight: 600;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .confidence-btn.required:after {
     content: "*";
-    color: red;
+    color: #ff4757;
     position: absolute;
     right: 5px;
     top: 5px;
@@ -252,43 +294,51 @@ body {
 }
 
 #confident-btn {
-    background-color: #4caf50;
+    background: rgba(76, 175, 80, 0.7);
     color: white;
 }
 
 #confident-btn:hover:not(.selected) {
-    background-color: #388e3c;
+    background: rgba(76, 175, 80, 0.9);
+    transform: translateY(-2px);
 }
 
 #not-sure-btn {
-    background-color: #fbc02d;
-    color: black;
+    background: rgba(251, 192, 45, 0.7);
+    color: white;
 }
 
 #not-sure-btn:hover:not(.selected) {
-    background-color: #f57c00;
+    background: rgba(251, 192, 45, 0.9);
+    transform: translateY(-2px);
 }
 
 #not-confident-btn {
-    background-color: #f44336;
+    background: rgba(244, 67, 54, 0.7);
     color: white;
 }
 
 #not-confident-btn:hover:not(.selected) {
-    background-color: #d32f2f;
+    background: rgba(244, 67, 54, 0.9);
+    transform: translateY(-2px);
 }
 
 /* Review Button */
 #review-btn {
-    background-color: #2196F3;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
     color: white;
     width: 100%;
-    margin-top: 10px;
-    padding: 12px;
+    margin-top: 20px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
 }
 
 #review-btn:hover:not(:disabled) {
-    background-color: #0b7dda;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(229, 46, 113, 0.4);
 }
 
 #review-btn:disabled {
@@ -296,27 +346,35 @@ body {
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Review Screen */
 .review-container {
-    background: white;
-    padding: 20px;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 25px;
     border-radius: 15px;
     width: 90%;
     max-width: 600px;
     text-align: center;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     margin: 20px auto;
+    color: white;
 }
 
 .review-item {
     margin: 15px 0;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
-    background-color: #f9f9f9;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.review-item:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .review-image {
@@ -324,11 +382,13 @@ body {
     max-height: 150px;
     margin: 10px 0;
     border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .review-answer {
     font-weight: bold;
     margin: 5px 0;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .review-buttons {
@@ -339,53 +399,65 @@ body {
 }
 
 .review-change-btn {
-    padding: 8px 15px;
-    background-color: #ff9800;
+    padding: 10px 15px;
+    background: rgba(255, 152, 0, 0.7);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
 }
 
 .review-change-btn:hover {
-    background-color: #f57c00;
+    background: rgba(255, 152, 0, 0.9);
+    transform: translateY(-2px);
 }
 
 /* Result Screen */
 .result-container {
     text-align: center;
-    padding: 20px;
-    background: white;
+    padding: 25px;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(5px);
     border-radius: 15px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 1s ease-in-out;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.5s ease-out;
     max-width: 600px;
     margin: 20px auto;
+    color: white;
 }
 
 .result-container h2 {
-    font-size: 26px;
-    color: #333;
+    font-size: 1.8rem;
+    margin: 0 0 15px 0;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .result-container p {
-    font-size: 20px;
-    font-weight: bold;
-    color: #555;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 10px 0;
 }
 
 .stars {
-    margin: 10px 0;
-    font-size: 30px;
+    margin: 15px 0;
+    font-size: 2rem;
 }
 
 .star {
     color: gold;
     animation: glow 1s infinite alternate;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 .star.faded {
-    color: lightgray;
+    color: rgba(255, 255, 255, 0.2);
     animation: none;
 }
 
@@ -393,34 +465,36 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .end-btn {
-    padding: 12px;
-    font-size: 16px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
-    width: 30%;
-    min-width: 110px;
+    width: 45%;
+    min-width: 140px;
     transition: all 0.3s ease;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Poppins', sans-serif;
 }
 
 .end-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 #finish-btn {
-    background-color: #4caf50;
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
     color: white;
 }
 
 #playagain-btn {
-    background-color: #fa3803;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
     color: white;
 }
 
@@ -438,10 +512,10 @@ body {
 
 @keyframes glow {
     from {
-        text-shadow: 0px 0px 5px gold;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
     }
     to {
-        text-shadow: 0px 0px 15px gold;
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
     }
 }
 
@@ -449,7 +523,7 @@ body {
 @media (max-width: 600px) {
     .quiz-container {
         width: 95%;
-        padding: 15px;
+        padding: 20px;
     }
 
     .buttons-container {
@@ -490,6 +564,6 @@ body {
     
     .answer-btn, .confidence-btn {
         padding: 12px 10px;
-        font-size: 16px;
+        font-size: 0.9rem;
     }
 }
