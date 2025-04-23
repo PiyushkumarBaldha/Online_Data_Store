@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real or Fake? AI Challenge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="particles"></div>
+  <div class="container animate__animated animate__fadeIn">
+    <div class="title-box">
+      <h1 class="animate__animated animate__bounceIn">REAL<span>or</span>FAKE?</h1>
+      <div class="pulse-circle"></div>
+    </div>
+    
+    <p class="subtitle">Can you spot AI-generated images?</p>
+    
+    <div class="instructions">
+      <h2><span class="icon">🔍</span> HOW TO PLAY</h2>
+      <ol>
+        <li>View each image carefully</li>
+        <li>Choose <strong>REAL</strong> or <strong>FAKE</strong></li>
+        <li>Rate your confidence:
+          <div class="confidence-levels">
+            <span class="confidence confident">Confident</span>
+            <span class="confidence unsure">Not Sure</span>
+            <span class="confidence not-confident">Guess</span>
+          </div>
+        </li>
+      </ol>
+      
+      <div class="tip-box">
+        <p class="tip">💡 Look for odd textures or too-perfect details!</p>
+      </div>
+    </div>
+    
+    <button id="start-btn" class="glow-on-hover">
+      <span class="btn-text">PLAY NOW</span>
+      <span class="btn-arrow">→</span>
+    </button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

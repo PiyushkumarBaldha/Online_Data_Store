@@ -18,7 +18,7 @@ let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
 let sessionId = generateSessionId();
-let playNumber = getPlayNumber(1);
+let playNumber = getPlayNumber();
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
@@ -68,12 +68,17 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Initialize player data in localStorage if not exists
     initPlayerData(formData);
+    
+    // Initialize session tracking
+    initSessionTracking();
 });
 
 // Initialize player data in localStorage
 function initPlayerData(formData) {
-    if (!localStorage.getItem('playerData')) {
-        const playerData = {
+    let playerData = JSON.parse(localStorage.getItem('playerData'));
+    
+    if (!playerData) {
+        playerData = {
             playerId: formData.playerId || generatePlayerId(),
             scores: [],
             sessions: [],
@@ -84,66 +89,88 @@ function initPlayerData(formData) {
                 status: formData.status || null
             }
         };
-        localStorage.setItem('playerData', JSON.stringify(playerData));
     }
+    
+    // Ensure playerId is always set
+    if (!playerData.playerId) {
+        playerData.playerId = formData.playerId || generatePlayerId();
+    }
+    
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+}
+
+// Initialize session tracking
+function initSessionTracking() {
+    let sessionData = JSON.parse(localStorage.getItem('sessionData')) || {
+        currentSession: sessionId,
+        playCount: 0
+    };
+    
+    // If this is a new session, reset play count
+    if (sessionData.currentSession !== sessionId) {
+        sessionData.currentSession = sessionId;
+        sessionData.playCount = 0;
+    }
+    
+    sessionData.playCount++;
+    localStorage.setItem('sessionData', JSON.stringify(sessionData));
 }
 
 function generatePlayerId() {
-    return 'player_' + Math.random().toString(36).substr(2, 9);
+    return 'player_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 }
 
 function getPlayNumber() {
     let playData = localStorage.getItem('playNumberData');
     
     if (!playData) {
-        // Initialize with whole number if no data exists
+        // Initialize with default values
         playData = {
             base: 1,
-            increment: 0
+            increment: 0,
+            lastSession: sessionId
         };
-    } else {
-        playData = JSON.parse(playData);
+        localStorage.setItem('playNumberData', JSON.stringify(playData));
+        return "1.0";
     }
     
-    // Format as "base.increment"
-    const currentNumber = `${playData.base}.${playData.increment}`;
+    playData = JSON.parse(playData);
     
-    return currentNumber;
+    // If this is a new session, reset the increment but keep the base
+    if (playData.lastSession !== sessionId) {
+        playData.increment = 0;
+        playData.lastSession = sessionId;
+        localStorage.setItem('playNumberData', JSON.stringify(playData));
+    }
+    
+    return `${playData.base}.${playData.increment}`;
 }
 
 function incrementPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
+    let playData = JSON.parse(localStorage.getItem('playNumberData')) || {
+        base: 1,
+        increment: 0,
+        lastSession: sessionId
+    };
     
     // Increment the decimal part for "Play Again"
     playData.increment += 1;
+    playData.lastSession = sessionId;
     
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
 
 function resetPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
+    let playData = JSON.parse(localStorage.getItem('playNumberData')) || {
+        base: 1,
+        increment: 0,
+        lastSession: sessionId
+    };
     
     // Increment the whole number and reset decimal for "Finish"
     playData.base += 1;
     playData.increment = 0;
+    playData.lastSession = sessionId;
     
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
@@ -265,7 +292,7 @@ function checkAnswer(isReal) {
     updateProgress();
     
     // Auto-proceed if confidence already selected
-    if (currentConfidence !== null) {
+    if (userConfidence[currentQuestionIndex] !== null) {
         goToNextQuestion();
     }
 }
@@ -308,7 +335,7 @@ function goToNextQuestion() {
         } else {
             // All questions answered - enable review button
             document.getElementById("review-btn").disabled = false;
-            // Optionally auto-show review screen:
+            // Show review screen automatically when all questions are answered
             showReviewScreen();
         }
     } else {
@@ -318,11 +345,13 @@ function goToNextQuestion() {
 }
 
 function findNextUnanswered(current) {
+    // First look ahead
     for (let i = current + 1; i < totalQuestions; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
+    // Then look from the beginning
     for (let i = 0; i < current; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
     return -1;
 }
@@ -377,39 +406,10 @@ function showReviewScreen() {
     `;
 }
 
-function checkAnswer(isReal) {
-    const answer = isReal ? "Real" : "Fake";
-    userAnswers[currentQuestionIndex] = answer;
-    
-    // Update score
-    score = 0;
-    userAnswers.forEach((ans, index) => {
-        if (ans === correctAnswers[index]) {
-            score += 10;
-        }
-    });
-    
-    updateScore();
-    markAnswered(currentQuestionIndex);
-    updateProgress();
-    
-    // Auto-proceed if confidence already selected
-    if (userConfidence[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
-}
-
-function setConfidence(confidence) {
-    currentConfidence = confidence;
-    userConfidence[currentQuestionIndex] = confidence;
-    
-    // Update button states
-    updateConfidenceButtons();
-    
-    // Auto-proceed if answer already selected
-    if (userAnswers[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
+function changeAnswer(index, answer) {
+    userAnswers[index] = answer;
+    // Re-render the review screen to show updated answer
+    showReviewScreen();
 }
 
 function submitFinalAnswers() {
@@ -482,7 +482,7 @@ function endQuiz() {
 // Store quiz data in localStorage
 function storeQuizData(quizData) {
     // Get existing player data
-    const playerData = JSON.parse(localStorage.getItem('playerData')) || {
+    let playerData = JSON.parse(localStorage.getItem('playerData')) || {
         playerId: quizData.playerId,
         scores: [],
         sessions: [],
@@ -503,6 +503,11 @@ function storeQuizData(quizData) {
         timeTaken: quizData.timeTaken
     });
     playerData.attempts = (playerData.attempts || 0) + 1;
+    
+    // Ensure playerId is always set
+    if (!playerData.playerId) {
+        playerData.playerId = quizData.playerId || generatePlayerId();
+    }
     
     // Save updated player data
     localStorage.setItem('playerData', JSON.stringify(playerData));

@@ -18,7 +18,7 @@ let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
 let sessionId = generateSessionId();
-let playNumber = getPlayNumber(1);
+let playNumber = initializePlayNumber();
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
@@ -88,64 +88,28 @@ function initPlayerData(formData) {
     }
 }
 
-function generatePlayerId() {
-    return 'player_' + Math.random().toString(36).substr(2, 9);
-}
-
-function getPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        // Initialize with whole number if no data exists
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
+// Simplified play number initialization
+function initializePlayNumber() {
+    let playNum = localStorage.getItem('quizPlayCount');
+    if (!playNum) {
+        playNum = 1;
+        localStorage.setItem('quizPlayCount', playNum);
     }
-    
-    // Format as "base.increment"
-    const currentNumber = `${playData.base}.${playData.increment}`;
-    
-    return currentNumber;
+    return parseInt(playNum);
 }
 
 function incrementPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
-    
-    // Increment the decimal part for "Play Again"
-    playData.increment += 1;
-    
-    localStorage.setItem('playNumberData', JSON.stringify(playData));
+    let current = parseInt(localStorage.getItem('quizPlayCount')) || 1;
+    current++;
+    localStorage.setItem('quizPlayCount', current);
 }
 
 function resetPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
-    
-    // Increment the whole number and reset decimal for "Finish"
-    playData.base += 1;
-    playData.increment = 0;
-    
-    localStorage.setItem('playNumberData', JSON.stringify(playData));
+    localStorage.setItem('quizPlayCount', '1');
+}
+
+function generatePlayerId() {
+    return 'player_' + Math.random().toString(36).substr(2, 9);
 }
 
 // Initialize the randomized image set with complete shuffling
@@ -265,7 +229,7 @@ function checkAnswer(isReal) {
     updateProgress();
     
     // Auto-proceed if confidence already selected
-    if (currentConfidence !== null) {
+    if (userConfidence[currentQuestionIndex] !== null) {
         goToNextQuestion();
     }
 }
@@ -308,7 +272,7 @@ function goToNextQuestion() {
         } else {
             // All questions answered - enable review button
             document.getElementById("review-btn").disabled = false;
-            // Optionally auto-show review screen:
+            // Show review screen automatically when all questions are answered
             showReviewScreen();
         }
     } else {
@@ -318,11 +282,13 @@ function goToNextQuestion() {
 }
 
 function findNextUnanswered(current) {
+    // First look ahead
     for (let i = current + 1; i < totalQuestions; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
+    // Then look from the beginning
     for (let i = 0; i < current; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
     return -1;
 }
@@ -377,39 +343,10 @@ function showReviewScreen() {
     `;
 }
 
-function checkAnswer(isReal) {
-    const answer = isReal ? "Real" : "Fake";
-    userAnswers[currentQuestionIndex] = answer;
-    
-    // Update score
-    score = 0;
-    userAnswers.forEach((ans, index) => {
-        if (ans === correctAnswers[index]) {
-            score += 10;
-        }
-    });
-    
-    updateScore();
-    markAnswered(currentQuestionIndex);
-    updateProgress();
-    
-    // Auto-proceed if confidence already selected
-    if (userConfidence[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
-}
-
-function setConfidence(confidence) {
-    currentConfidence = confidence;
-    userConfidence[currentQuestionIndex] = confidence;
-    
-    // Update button states
-    updateConfidenceButtons();
-    
-    // Auto-proceed if answer already selected
-    if (userAnswers[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
+function changeAnswer(index, answer) {
+    userAnswers[index] = answer;
+    // Re-render the review screen to show updated answer
+    showReviewScreen();
 }
 
 function submitFinalAnswers() {

@@ -1,0 +1,154 @@
+/* Base Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #0f0c29, #302b63);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: #fff;
+  }
+  
+  .particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></svg>');
+    z-index: -1;
+  }
+  
+  /* Form Container */
+  .form-container {
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 25px;
+    border-radius: 15px;
+    width: 85%;
+    max-width: 350px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Title */
+  .form-container h2 {
+    font-size: 1.8rem;
+    margin: 0 0 25px 0;
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -1px;
+  }
+  
+  /* Form Labels */
+  label {
+    display: block;
+    text-align: left;
+    margin: 20px 0 8px 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+  
+  /* Uniform Input Styling */
+  input, select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    height: 48px;
+    line-height: 24px;
+  }
+  
+  /* Number Input Fixes */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  /* Select Dropdown Styling */
+  select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 15px;
+    padding-right: 35px;
+  }
+  
+  select option {
+    background: rgba(15, 12, 41, 0.95);
+    color: white;
+  }
+  
+  /* Focus States */
+  input:focus, select:focus {
+    outline: none;
+    border-color: #ff8a00;
+    box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  /* Required Field Marker */
+  .required {
+    color: #ff4757;
+    font-weight: bold;
+  }
+  
+  /* Submit Button */
+  button {
+    background: linear-gradient(45deg, #ff8a00, #e52e71);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(229, 46, 113, 0.4);
+  }
+  
+  /* Mobile Optimization */
+  @media (max-width: 400px) {
+    .form-container {
+      padding: 20px;
+      width: 90%;
+    }
+    
+    .form-container h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    
+    label {
+      font-size: 0.9rem;
+    }
+    
+    input, select {
+      padding: 10px 12px;
+      height: 44px;
+    }
+  }
