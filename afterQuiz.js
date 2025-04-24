@@ -1,108 +1,165 @@
-// Quiz Configuration
-const colors = [
-    ["#f79c99", "#f7d7d2"],
-    ["#a2f7a2", "#d7f7d2"],
-    ["#a2a2f7", "#d2d7f7"],
-    ["#f7f7a2", "#f7f7c7"],
-    ["#a2f7c7", "#d2f7d7"],
-    ["#a2c7f7", "#d2d7f7"],
-    ["#f7c7a2", "#f7d2c7"],
-    ["#c7f7a2", "#d2f7a2"],
-    ["#a2a2c7", "#d7d7f7"],
-    ["#c7a2f7", "#d2c7f7"],
+// AfterQuiz Configuration
+const afterQuizColors = [
+    ["#0f0c29", "#302b63"],
+    ["#1a1a2e", "#16213e"],
+    ["#1f005c", "#5b0060"],
+    ["#070024", "#2c005b"],
+    ["#0f2027", "#203a43"],
+    ["#1a2a6c", "#b21f1f"],
+    ["#3a1c71", "#d76d77"],
+    ["#200122", "#6f0000"],
+    ["#0f0c29", "#24243e"],
+    ["#000428", "#004e92"]
 ];
 
-// Quiz Variables
-let score = 0;
-let currentQuestionIndex = 0;
-const totalQuestions = 10;
-let imageFolder = "Img"; // Default image folder
-let sessionId = generateSessionId();
-let playNumber = getPlayNumber();
-let userAnswers = new Array(totalQuestions).fill(null);
-let userConfidence = new Array(totalQuestions).fill(null);
-let timerInterval;
-const quizStartTime = Date.now();
+// AfterQuiz Variables
+let afterQuizScore = 0;
+let currentAfterQuizQuestionIndex = 0;
+const totalAfterQuizQuestions = 10;
+let afterQuizImageFolder = "Img";
+let afterQuizSessionId = generateAfterQuizSessionId();
+let afterQuizPlayNumber = getAfterQuizPlayNumber(1);
+let afterQuizUserAnswers = new Array(totalAfterQuizQuestions).fill(null);
+let afterQuizUserConfidence = new Array(totalAfterQuizQuestions).fill(null);
+let afterQuizTimerInterval;
+const afterQuizStartTime = Date.now();
+let currentAfterQuizConfidence = null;
 
-// This will store our randomized image paths and their correct answers
-let imageSet = [];
-let correctAnswers = {};
+let afterQuizImageSet = [];
+let afterQuizCorrectAnswers = {};
 
-// Initialize the quiz when DOM is loaded
-document.addEventListener("DOMContentLoaded", function () {
-    // Set image folder based on user data
-    const userAge = localStorage.getItem("userAge");
-    const userProfession = localStorage.getItem("userProfession");
+// Initialize the quiz
+document.addEventListener("DOMContentLoaded", function() {
+    initQuiz();
+});
 
-    if (userAge !== null && userProfession !== null) {
-        const age = parseInt(userAge);
-        if (userProfession !== "engineer") {
+function initQuiz() {
+    const afterQuizFormData = JSON.parse(localStorage.getItem('formData') || '{}');
+    const afterQuizUserAge = afterQuizFormData.age || localStorage.getItem("userAge");
+    const afterQuizUserProfession = afterQuizFormData.profession || localStorage.getItem("userProfession");
+
+    if (afterQuizUserAge !== null && afterQuizUserProfession !== null) {
+        const age = parseInt(afterQuizUserAge);
+        if (afterQuizUserProfession.toLowerCase() !== "engineer") {
             if (age >= 0 && age <= 18) {
-                imageFolder = "Img18";
+                afterQuizImageFolder = "Img18";
             } else if (age >= 19 && age <= 60) {
-                imageFolder = "Img60";
+                afterQuizImageFolder = "Img60";
             } else if (age >= 61 && age <= 100) {
-                imageFolder = "Img70";
+                afterQuizImageFolder = "Img70";
             }
         }
     }
     
-    // Initialize the image set (5 from R folder, 5 from F folder)
-    initializeImageSet();
-    
-    // Create navigation
-    createNavigation();
-    
-    // Initialize timer
-    initializeTimer();
-    
-    // Set up event listeners
-    setupEventListeners();
-    
-    // Update first question
-    updateQuestion();
-});
+    initializeAfterQuizImageSet();
+    createAfterQuizNavigation();
+    initializeAfterQuizTimer();
+    setupAfterQuizEventListeners();
+    updateAfterQuizQuestion();
+    initAfterQuizPlayerData(afterQuizFormData);
+}
 
-// Initialize the randomized image set with complete shuffling
-function initializeImageSet() {
-    // Total number of images available in each folder
+function initAfterQuizPlayerData(afterQuizFormData) {
+    if (!localStorage.getItem('playerData')) {
+        const afterQuizPlayerData = {
+            playerId: afterQuizFormData.playerId || generateAfterQuizPlayerId(),
+            scores: [],
+            sessions: [],
+            attempts: 0,
+            formData: {
+                age: afterQuizFormData.age || null,
+                profession: afterQuizFormData.profession || null,
+                status: afterQuizFormData.status || null
+            }
+        };
+        localStorage.setItem('playerData', JSON.stringify(afterQuizPlayerData));
+    }
+}
+
+function generateAfterQuizPlayerId() {
+    return 'player_' + Math.random().toString(36).substr(2, 9);
+}
+
+function generateAfterQuizSessionId() {
+    return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+}
+
+function getAfterQuizPlayNumber() {
+    let afterQuizPlayData = localStorage.getItem('afterQuizPlayNumberData');
+    
+    if (!afterQuizPlayData) {
+        afterQuizPlayData = {
+            base: 1,
+            increment: 0
+        };
+    } else {
+        afterQuizPlayData = JSON.parse(afterQuizPlayData);
+    }
+    
+    return `${afterQuizPlayData.base}.${afterQuizPlayData.increment}`;
+}
+
+function incrementAfterQuizPlayNumber() {
+    let afterQuizPlayData = localStorage.getItem('afterQuizPlayNumberData');
+    
+    if (!afterQuizPlayData) {
+        afterQuizPlayData = {
+            base: 1,
+            increment: 0
+        };
+    } else {
+        afterQuizPlayData = JSON.parse(afterQuizPlayData);
+    }
+    
+    afterQuizPlayData.increment += 1;
+    localStorage.setItem('afterQuizPlayNumberData', JSON.stringify(afterQuizPlayData));
+}
+
+function resetAfterQuizPlayNumber() {
+    let afterQuizPlayData = localStorage.getItem('afterQuizPlayNumberData');
+    
+    if (!afterQuizPlayData) {
+        afterQuizPlayData = {
+            base: 1,
+            increment: 0
+        };
+    } else {
+        afterQuizPlayData = JSON.parse(afterQuizPlayData);
+    }
+    
+    afterQuizPlayData.base += 1;
+    afterQuizPlayData.increment = 0;
+    localStorage.setItem('afterQuizPlayNumberData', JSON.stringify(afterQuizPlayData));
+}
+
+function initializeAfterQuizImageSet() {
     const totalImages = 50;
     
-    // Create separate arrays for R and F folder images
-    const allRImages = Array.from({length: totalImages}, (_, i) => ({
-        path: `${imageFolder}/R/${i+1}.jpg`,
+    const allAfterQuizRImages = Array.from({length: totalImages}, (_, i) => ({
+        path: `${afterQuizImageFolder}/R/${i+1}.jpg`,
         answer: "Real"
     }));
     
-    const allFImages = Array.from({length: totalImages}, (_, i) => ({
-        path: `${imageFolder}/F/${i+1}.jpg`,
+    const allAfterQuizFImages = Array.from({length: totalImages}, (_, i) => ({
+        path: `${afterQuizImageFolder}/F/${i+1}.jpg`,
         answer: "Fake"
     }));
     
-    // Shuffle both sets separately
-    shuffleArray(allRImages);
-    shuffleArray(allFImages);
+    shuffleAfterQuizArray(allAfterQuizRImages);
+    shuffleAfterQuizArray(allAfterQuizFImages);
     
-    // Take first 5 from each shuffled set
-    const selectedR = allRImages.slice(0, 5);
-    const selectedF = allFImages.slice(0, 5);
+    const selectedAfterQuizR = allAfterQuizRImages.slice(0, 5);
+    const selectedAfterQuizF = allAfterQuizFImages.slice(0, 5);
     
-    // Combine all selected images
-    imageSet = [...selectedR, ...selectedF];
+    afterQuizImageSet = [...selectedAfterQuizR, ...selectedAfterQuizF];
+    shuffleAfterQuizArray(afterQuizImageSet);
     
-    // Shuffle the combined set again for final randomness
-    shuffleArray(imageSet);
-    
-    // Create correct answers mapping
-    imageSet.forEach((img, index) => {
-        correctAnswers[index] = img.answer;
+    afterQuizImageSet.forEach((img, index) => {
+        afterQuizCorrectAnswers[index] = img.answer;
     });
-    
-    console.log("Selected images:", imageSet); // For debugging
 }
 
-// Fisher-Yates shuffle algorithm for complete randomization
-function shuffleArray(array) {
+function shuffleAfterQuizArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
@@ -110,39 +167,29 @@ function shuffleArray(array) {
     return array;
 }
 
+function createAfterQuizNavigation() {
+    const navContainer = document.getElementById("question-nav");
 
-// Navigation Functions
-function createNavigation() {
-    const navContainer = document.createElement("div");
-    navContainer.id = "question-nav";
-    document.body.insertBefore(navContainer, document.body.firstChild);
-
-    for (let i = 0; i < totalQuestions; i++) {
+    for (let i = 0; i < totalAfterQuizQuestions; i++) {
         let btn = document.createElement("button");
         btn.textContent = i + 1;
         btn.classList.add("nav-btn");
-        btn.style.backgroundColor = "yellow";
-        btn.addEventListener("click", () => goToQuestion(i));
+        btn.addEventListener("click", () => goToAfterQuizQuestion(i));
         navContainer.appendChild(btn);
     }
 }
 
-function goToQuestion(index) {
-    currentQuestionIndex = index;
-    updateQuestion();
+function goToAfterQuizQuestion(index) {
+    currentAfterQuizQuestionIndex = index;
+    currentAfterQuizConfidence = afterQuizUserConfidence[index];
+    updateAfterQuizQuestion();
 }
 
-// Timer Functions
-function initializeTimer() {
-    const timerElement = document.createElement("div");
-    timerElement.id = "timer";
-    timerElement.style.fontSize = "20px";
-    timerElement.style.fontWeight = "bold";
-    timerElement.style.marginTop = "10px";
-    document.getElementById("question-nav").parentNode.insertBefore(timerElement, document.getElementById("question-nav").nextSibling);
+function initializeAfterQuizTimer() {
+    const timerElement = document.getElementById("timer");
 
     let totalTime = 600;
-    function updateTimer() {
+    function updateAfterQuizTimer() {
         const minutes = Math.floor(totalTime / 60);
         const seconds = totalTime % 60;
         timerElement.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -152,189 +199,339 @@ function initializeTimer() {
         }
 
         if (totalTime <= 0) {
-            clearInterval(timerInterval);
-            endQuiz();
+            clearInterval(afterQuizTimerInterval);
+            endAfterQuiz();
         }
         totalTime--;
     }
-    timerInterval = setInterval(updateTimer, 1000);
+    afterQuizTimerInterval = setInterval(updateAfterQuizTimer, 1000);
+    updateAfterQuizTimer();
 }
 
-// Question Handling
-function updateQuestion() {
-    setGradientBackground();
-    document.querySelector("h2").textContent = "Question " + (currentQuestionIndex + 1);
+function updateAfterQuizQuestion() {
+    setAfterQuizGradientBackground();
+    document.getElementById("question-title").textContent = "Question " + (currentAfterQuizQuestionIndex + 1);
     
-    // Get the image for this question from the randomized set
-    document.getElementById("quiz-image").src = imageSet[currentQuestionIndex].path;
-}
-
-function checkAnswer(isReal) {
-    if (userAnswers[currentQuestionIndex] !== null) return;
+    const quizImage = document.getElementById("quiz-image");
+    const currentImage = afterQuizImageSet[currentAfterQuizQuestionIndex];
     
-    let userAnswer = isReal ? "Real" : "Fake";
-    userAnswers[currentQuestionIndex] = userAnswer;
-    
-    if (userAnswer === correctAnswers[currentQuestionIndex]) {
-        score += 10;
+    if (currentImage) {
+        quizImage.src = currentImage.path;
+        quizImage.onerror = function() {
+            console.error("Failed to load image:", currentImage.path);
+            quizImage.src = "Img/default.jpg";
+        };
     }
     
-    updateScore();
-    markAnswered(currentQuestionIndex);
-    updateProgress();
+    updateAfterQuizConfidenceButtons();
+}
 
-    let nextIndex = findNextUnanswered(currentQuestionIndex);
-    if (nextIndex !== -1) {
-        currentQuestionIndex = nextIndex;
-        updateQuestion();
+function checkAfterQuizAnswer(isReal) {
+    const answer = isReal ? "Real" : "Fake";
+    afterQuizUserAnswers[currentAfterQuizQuestionIndex] = answer;
+    
+    afterQuizScore = 0;
+    afterQuizUserAnswers.forEach((ans, index) => {
+        if (ans === afterQuizCorrectAnswers[index]) {
+            afterQuizScore += 10;
+        }
+    });
+    
+    updateAfterQuizScore();
+    markAfterQuizAnswered(currentAfterQuizQuestionIndex);
+    updateAfterQuizProgress();
+    
+    if (currentAfterQuizConfidence !== null) {
+        goToNextAfterQuizQuestion();
+    }
+}
+
+function setAfterQuizConfidence(confidence) {
+    currentAfterQuizConfidence = confidence;
+    afterQuizUserConfidence[currentAfterQuizQuestionIndex] = confidence;
+    updateAfterQuizConfidenceButtons();
+    
+    if (afterQuizUserAnswers[currentAfterQuizQuestionIndex] !== null) {
+        goToNextAfterQuizQuestion();
+    }
+}
+
+function updateAfterQuizConfidenceButtons() {
+    const buttons = document.querySelectorAll(".confidence-btn");
+    buttons.forEach(btn => btn.classList.remove("selected"));
+    
+    if (currentAfterQuizConfidence === "Confident") {
+        document.getElementById("confident-btn").classList.add("selected");
+    } else if (currentAfterQuizConfidence === "Not Sure") {
+        document.getElementById("not-sure-btn").classList.add("selected");
+    } else if (currentAfterQuizConfidence === "Not Confident") {
+        document.getElementById("not-confident-btn").classList.add("selected");
+    }
+}
+
+function goToNextAfterQuizQuestion() {
+    if (afterQuizUserAnswers[currentAfterQuizQuestionIndex] !== null && 
+        afterQuizUserConfidence[currentAfterQuizQuestionIndex] !== null) {
+        let nextIndex = findNextAfterQuizUnanswered(currentAfterQuizQuestionIndex);
+        
+        if (nextIndex !== -1) {
+            currentAfterQuizQuestionIndex = nextIndex;
+            currentAfterQuizConfidence = afterQuizUserConfidence[nextIndex];
+            updateAfterQuizQuestion();
+        } else {
+            document.getElementById("review-btn").disabled = false;
+            showAfterQuizReviewScreen();
+        }
     } else {
-        endQuiz();
+        alert("Please select both an answer and confidence level before proceeding.");
     }
 }
 
-function findNextUnanswered(current) {
-    for (let i = current + 1; i < totalQuestions; i++) {
-        if (userAnswers[i] === null) return i;
+function findNextAfterQuizUnanswered(current) {
+    for (let i = current + 1; i < totalAfterQuizQuestions; i++) {
+        if (afterQuizUserAnswers[i] === null) return i;
     }
-    for (let i = 0; i <= current; i++) {
-        if (userAnswers[i] === null) return i;
+    for (let i = 0; i < current; i++) {
+        if (afterQuizUserAnswers[i] === null) return i;
     }
     return -1;
 }
 
-function markAnswered(index) {
+function markAfterQuizAnswered(index) {
     const navButtons = document.querySelectorAll(".nav-btn");
     const button = navButtons[index];
-    if (userAnswers[index] === correctAnswers[index]) {
-        button.style.backgroundColor = "green";
-    } else {
-        button.style.backgroundColor = "red";
-    }
+    button.classList.remove("correct", "incorrect");
+    button.classList.add("answered");
 }
 
-function updateProgress() {
-    let answeredCount = userAnswers.filter(answer => answer !== null).length;
-    const progress = (answeredCount / totalQuestions) * 100;
+function updateAfterQuizProgress() {
+    let answeredCount = afterQuizUserAnswers.filter(answer => answer !== null).length;
+    const progress = (answeredCount / totalAfterQuizQuestions) * 100;
     document.getElementById("progress-bar-filled").style.width = progress + "%";
     document.getElementById("progress-bar-filled").textContent = Math.round(progress) + "%";
 }
 
-function updateScore() {
-    document.getElementById("score").textContent = score;
+function updateAfterQuizScore() {
+    document.getElementById("score").textContent = afterQuizScore;
 }
 
-// End Quiz Functions
-function endQuiz() {
-    clearInterval(timerInterval);
-    const quizEndTime = Date.now();
-    const timeTaken = Math.floor((quizEndTime - quizStartTime) / 1000);
+function showAfterQuizReviewScreen() {
+    const quizContainer = document.querySelector(".quiz-container");
+    quizContainer.innerHTML = `
+        <div class="review-container">
+            <h2>Review Your Answers</h2>
+            <p>Check your answers before submitting. You can change any answer.</p>
+            
+            ${afterQuizImageSet.map((img, index) => `
+                <div class="review-item">
+                    <h4>Question ${index + 1}</h4>
+                    <img class="review-image" src="${img.path}" alt="Question ${index + 1}">
+                    <div class="review-answer">
+                        Your answer: ${afterQuizUserAnswers[index] || "Not answered yet"}
+                        ${afterQuizUserAnswers[index] ? `(${afterQuizUserConfidence[index] || "No confidence level"})` : ''}
+                    </div>
+                    <div class="review-buttons">
+                        <button class="review-change-btn" data-index="${index}" data-answer="Real">Change to Real</button>
+                        <button class="review-change-btn" data-index="${index}" data-answer="Fake">Change to Fake</button>
+                    </div>
+                </div>
+            `).join('')}
+            
+            <div style="margin-top: 20px;">
+                <button id="final-submit-btn" class="submit-btn">Submit Final Answers</button>
+            </div>
+        </div>
+    `;
+
+    document.querySelectorAll('.review-change-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const answer = this.getAttribute('data-answer');
+            afterQuizUserAnswers[index] = answer;
+            
+            const answerElements = document.querySelectorAll('.review-answer');
+            if (answerElements[index]) {
+                answerElements[index].textContent = `Your answer: ${answer} (${afterQuizUserConfidence[index] || "No confidence level"})`;
+            }
+            
+            // Recalculate score
+            afterQuizScore = 0;
+            for (let i = 0; i < totalAfterQuizQuestions; i++) {
+                if (afterQuizUserAnswers[i] === afterQuizCorrectAnswers[i]) {
+                    afterQuizScore += 10;
+                }
+            }
+        });
+    });
+
+    const submitBtn = document.getElementById('final-submit-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Validate all questions are answered
+            for (let i = 0; i < totalAfterQuizQuestions; i++) {
+                if (afterQuizUserAnswers[i] === null || afterQuizUserConfidence[i] === null) {
+                    alert("Please answer all questions before submitting!");
+                    return;
+                }
+            }
+            
+            // Calculate final score
+            afterQuizScore = 0;
+            for (let i = 0; i < totalAfterQuizQuestions; i++) {
+                if (afterQuizUserAnswers[i] === afterQuizCorrectAnswers[i]) {
+                    afterQuizScore += 10;
+                }
+            }
+            
+            // Show results
+            endAfterQuiz();
+        });
+    }
+}
+
+function endAfterQuiz() {
+    clearInterval(afterQuizTimerInterval);
+    const afterQuizEndTime = Date.now();
+    const timeTaken = Math.floor((afterQuizEndTime - afterQuizStartTime) / 1000);
     
-    // Prepare the answers for reporting
-    const answersReport = {};
-    imageSet.forEach((img, index) => {
-        answersReport[index] = {
+    const afterQuizAnswersReport = {};
+    afterQuizImageSet.forEach((img, index) => {
+        afterQuizAnswersReport[index] = {
             imagePath: img.path,
-            answer: userAnswers[index],
-            confidence: userConfidence[index],
-            correct: userAnswers[index] === correctAnswers[index]
+            answer: afterQuizUserAnswers[index],
+            confidence: afterQuizUserConfidence[index],
+            correct: afterQuizUserAnswers[index] === afterQuizCorrectAnswers[index]
         };
     });
 
-    const quizData = {
+    const afterQuizFormData = JSON.parse(localStorage.getItem('formData') || {});
+
+    const afterQuizData = {
         timestamp: new Date().toISOString(),
-        age: localStorage.getItem("userAge") || "unknown",
-        profession: localStorage.getItem("userProfession") || "unknown",
-        score: score,
-        answers: answersReport,
+        age: afterQuizFormData.age || "unknown",
+        profession: afterQuizFormData.profession || "unknown",
+        status: afterQuizFormData.status || "unknown",
+        score: afterQuizScore,
+        answers: afterQuizAnswersReport,
         timeTaken: timeTaken,
-        sessionId: sessionId,
-        playNumber: playNumber,
-        imageSet: imageSet // Include the image set for reference
+        sessionId: afterQuizSessionId,
+        playNumber: afterQuizPlayNumber,
+        imageSet: afterQuizImageSet,
+        playerId: afterQuizFormData.playerId || generateAfterQuizPlayerId()
     };
 
-    // Send data to Google Sheets
-    sendDataToGoogleSheets(quizData);
+    storeAfterQuizData(afterQuizData);
+    sendAfterQuizDataToGoogleSheets(afterQuizData);
 
     document.querySelector(".quiz-container").innerHTML = `
         <div class="result-container">
             <h2>Quiz Complete!</h2>
-            <p>Score: <strong>${score}/100</strong></p>
+            <p>Score: <strong>${afterQuizScore}/100</strong></p>
             <p>Time Taken: <strong>${Math.floor(timeTaken/60)}m ${timeTaken%60}s</strong></p>
-            <div class="stars">${getStarRating()}</div>
+            <div class="stars">${getAfterQuizStarRating()}</div>
             <div class="end-container">
-                <button class="end-btn" id="finish-btn" onclick="finishGame()">Finish</button>
-                <button class="end-btn" id="playagain-btn" onclick="playAgain()">Play Again</button>
+                <button class="end-btn" id="finish-btn">Finish</button>
+                <button class="end-btn" id="playagain-btn">Play Again</button>
             </div>
         </div>
     `;
+
+    document.getElementById('finish-btn').addEventListener('click', finishAfterQuizGame);
+    document.getElementById('playagain-btn').addEventListener('click', playAfterQuizAgain);
 }
 
-function getStarRating() {
-    return score >= 80 ? "⭐️⭐️⭐️" : score >= 50 ? "⭐️⭐️☆" : "⭐️☆☆";
+function storeAfterQuizData(afterQuizData) {
+    const playerData = JSON.parse(localStorage.getItem('playerData')) || {
+        playerId: afterQuizData.playerId,
+        scores: [],
+        sessions: [],
+        attempts: 0,
+        formData: {
+            age: afterQuizData.age,
+            profession: afterQuizData.profession,
+            status: afterQuizData.status
+        }
+    };
+    
+    playerData.scores.push(afterQuizData.score);
+    playerData.sessions.push({
+        sessionId: afterQuizData.sessionId,
+        timestamp: afterQuizData.timestamp,
+        score: afterQuizData.score,
+        timeTaken: afterQuizData.timeTaken
+    });
+    playerData.attempts = (playerData.attempts || 0) + 1;
+    
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+    localStorage.setItem('afterQuizPerformance', JSON.stringify(afterQuizData));
 }
 
-async function sendDataToGoogleSheets(quizData) {
-    try {
-        await fetch('https://script.google.com/macros/s/AKfycbzOz4WvkQ7gDPzIfvBHLRV800CEESD02Fs0ss7tCcHo9R_hF597bYjDSrcRvKvsN65cUw/exec', {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(quizData),
-        });
-
-        console.log('Timestamp sent to Google Sheets.');
-    } catch (error) {
-        console.error('Error sending timestamp:', error);
+function sendAfterQuizDataToGoogleSheets(afterQuizData) {
+    const formData = new URLSearchParams();
+    
+    formData.append('timestamp', afterQuizData.timestamp);
+    formData.append('sessionId', afterQuizData.sessionId);
+    formData.append('playNumber', afterQuizData.playNumber);
+    formData.append('age', afterQuizData.age);
+    formData.append('profession', afterQuizData.profession);
+    formData.append('status', afterQuizData.status);
+    formData.append('score', afterQuizData.score);
+    formData.append('timeTaken', afterQuizData.timeTaken);
+    formData.append('playerId', afterQuizData.playerId);
+    
+    for (let i = 0; i < totalAfterQuizQuestions; i++) {
+        formData.append(`q${i+1}_image`, afterQuizData.imageSet[i].path);
+        formData.append(`q${i+1}_answer`, afterQuizUserAnswers[i] || '');
+        formData.append(`q${i+1}_confidence`, afterQuizUserConfidence[i] || '');
+        formData.append(`q${i+1}_correct`, (afterQuizUserAnswers[i] === afterQuizCorrectAnswers[i]) ? '1' : '0');
     }
+    
+    fetch('https://script.google.com/macros/s/AKfycbzOz4WvkQ7gDPzIfvBHLRV800CEESD02Fs0ss7tCcHo9R_hF597bYjDSrcRvKvsN65cUw/exec', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-// Utility Functions
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+function getAfterQuizStarRating() {
+    return afterQuizScore >= 80 ? "⭐️⭐️⭐️" : afterQuizScore >= 50 ? "⭐️⭐️☆" : "⭐️☆☆";
 }
 
-function getPlayNumber() {
-    let playNumber = localStorage.getItem('playNumber');
-    if (!playNumber) {
-        playNumber = 1;
-    } else {
-        playNumber = parseInt(playNumber) + 1;
-    }
-    localStorage.setItem('playNumber', playNumber);
-    return playNumber;
-}
-
-function setGradientBackground() {
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    const gradient = `linear-gradient(to bottom, ${colors[randomIndex][0]}, ${colors[randomIndex][1]})`;
+function setAfterQuizGradientBackground() {
+    const randomIndex = Math.floor(Math.random() * afterQuizColors.length);
+    const gradient = `linear-gradient(to bottom, ${afterQuizColors[randomIndex][0]}, ${afterQuizColors[randomIndex][1]})`;
     document.body.style.background = gradient;
 }
 
-function setupEventListeners() {
-    document.getElementById("real-btn").addEventListener("click", () => checkAnswer(true));
-    document.getElementById("fake-btn").addEventListener("click", () => checkAnswer(false));
+function setupAfterQuizEventListeners() {
+    document.getElementById("real-btn").addEventListener("click", () => checkAfterQuizAnswer(true));
+    document.getElementById("fake-btn").addEventListener("click", () => checkAfterQuizAnswer(false));
     
-    document.getElementById("confident-btn").addEventListener("click", function() {
-        userConfidence[currentQuestionIndex] = "Confident";
-    });
-    document.getElementById("not-sure-btn").addEventListener("click", function() {
-        userConfidence[currentQuestionIndex] = "Not Sure";
-    });
-    document.getElementById("not-confident-btn").addEventListener("click", function() {
-        userConfidence[currentQuestionIndex] = "Not Confident";
-    });
+    document.getElementById("confident-btn").addEventListener("click", () => setAfterQuizConfidence("Confident"));
+    document.getElementById("not-sure-btn").addEventListener("click", () => setAfterQuizConfidence("Not Sure"));
+    document.getElementById("not-confident-btn").addEventListener("click", () => setAfterQuizConfidence("Not Confident"));
+    
+    document.getElementById("review-btn").addEventListener("click", showAfterQuizReviewScreen);
 }
 
-// Navigation Functions
-function finishGame() {
-    window.location.href = "index.html";
-}
-
-function playAgain() {
+function playAfterQuizAgain() {
+    incrementAfterQuizPlayNumber();
     let attempt = parseInt(localStorage.getItem("attempt") || "1", 10);
     attempt++;
     localStorage.setItem("attempt", attempt);
     window.location.reload();
+}
+
+function finishAfterQuizGame() {
+    resetAfterQuizPlayNumber();
+    localStorage.removeItem('formData');
+    window.location.href = "photo-learning.html";
 }
