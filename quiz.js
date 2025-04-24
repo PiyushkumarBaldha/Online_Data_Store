@@ -32,7 +32,7 @@ let correctAnswers = {};
 // Initialize the quiz when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
     // Get form data from localStorage
-    const formData = JSON.parse(localStorage.getItem('formData') || {});
+    const formData = JSON.parse(localStorage.getItem('formData') || '{}');
     
     // Set image folder based on user data
     const userAge = formData.age || localStorage.getItem("userAge");
@@ -364,52 +364,49 @@ function showReviewScreen() {
                         ${userAnswers[index] ? `(${userConfidence[index] || "No confidence level"})` : ''}
                     </div>
                     <div class="review-buttons">
-                        <button class="review-change-btn" onclick="changeAnswer(${index}, 'Real')">Change to Real</button>
-                        <button class="review-change-btn" onclick="changeAnswer(${index}, 'Fake')">Change to Fake</button>
+                        <button class="review-change-btn" data-index="${index}" data-answer="Real">Change to Real</button>
+                        <button class="review-change-btn" data-index="${index}" data-answer="Fake">Change to Fake</button>
                     </div>
                 </div>
             `).join('')}
             
             <div style="margin-top: 20px;">
-                <button class="confidence-btn" style="background-color: #2196F3;" onclick="submitFinalAnswers()">Submit Final Answers</button>
+                <button id="final-submit-btn" class="confidence-btn" style="background-color: #2196F3;">Submit Final Answers</button>
             </div>
         </div>
     `;
+
+    // Add event listeners to the dynamically created buttons
+    document.querySelectorAll('.review-change-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const answer = this.getAttribute('data-answer');
+            changeAnswer(index, answer);
+        });
+    });
+
+    // Add event listener for the final submit button AFTER it's created
+    document.getElementById('final-submit-btn').addEventListener('click', function() {
+        submitFinalAnswers();
+    });
 }
 
-function checkAnswer(isReal) {
-    const answer = isReal ? "Real" : "Fake";
-    userAnswers[currentQuestionIndex] = answer;
+function changeAnswer(index, answer) {
+    userAnswers[index] = answer;
     
-    // Update score
+    // Update the display
+    const answerElements = document.querySelectorAll('.review-answer');
+    if (answerElements[index]) {
+        answerElements[index].textContent = `Your answer: ${answer} (${userConfidence[index] || "No confidence level"})`;
+    }
+    
+    // Recalculate score
     score = 0;
-    userAnswers.forEach((ans, index) => {
-        if (ans === correctAnswers[index]) {
+    userAnswers.forEach((ans, i) => {
+        if (ans === correctAnswers[i]) {
             score += 10;
         }
     });
-    
-    updateScore();
-    markAnswered(currentQuestionIndex);
-    updateProgress();
-    
-    // Auto-proceed if confidence already selected
-    if (userConfidence[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
-}
-
-function setConfidence(confidence) {
-    currentConfidence = confidence;
-    userConfidence[currentQuestionIndex] = confidence;
-    
-    // Update button states
-    updateConfidenceButtons();
-    
-    // Auto-proceed if answer already selected
-    if (userAnswers[currentQuestionIndex] !== null) {
-        goToNextQuestion();
-    }
 }
 
 function submitFinalAnswers() {
@@ -472,11 +469,15 @@ function endQuiz() {
             <p>Time Taken: <strong>${Math.floor(timeTaken/60)}m ${timeTaken%60}s</strong></p>
             <div class="stars">${getStarRating()}</div>
             <div class="end-container">
-                <button class="end-btn" id="finish-btn" onclick="finishGame()">Finish</button>
-                <button class="end-btn" id="playagain-btn" onclick="playAgain()">Play Again</button>
+                <button class="end-btn" id="finish-btn">Finish</button>
+                <button class="end-btn" id="playagain-btn">Play Again</button>
             </div>
         </div>
     `;
+
+    // Add event listeners to the new buttons
+    document.getElementById('finish-btn').addEventListener('click', finishGame);
+    document.getElementById('playagain-btn').addEventListener('click', playAgain);
 }
 
 // Store quiz data in localStorage
@@ -588,9 +589,3 @@ function finishGame() {
     localStorage.removeItem('formData');
     window.location.href = "photo-learning.html";
 }
-
-// Make functions available in global scope for HTML onclick handlers
-window.changeAnswer = changeAnswer;
-window.submitFinalAnswers = submitFinalAnswers;
-window.finishGame = finishGame;
-window.playAgain = playAgain;
