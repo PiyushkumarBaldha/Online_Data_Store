@@ -275,7 +275,7 @@ function getStarRating() {
 
 async function sendDataToGoogleSheets(quizData) {
     try {
-        await fetch('https://script.google.com/macros/s/AKfycbyrL82R9ZRso-gR1UCiii5qk_wmP7sLnQzD3dfiFz8bhxd4JtALbi1vSb8kGfNzeixF/exec', {
+        await fetch('https://script.google.com/macros/s/AKfycbzOz4WvkQ7gDPzIfvBHLRV800CEESD02Fs0ss7tCcHo9R_hF597bYjDSrcRvKvsN65cUw/exec', {
             method: 'POST',
             mode: 'no-cors',
             headers: {
