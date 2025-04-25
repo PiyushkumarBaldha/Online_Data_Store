@@ -537,7 +537,7 @@ function resetPlayNumber() {
         }
         
         // Send data to Google Sheets
-        fetch('https://script.google.com/macros/s/AKfycbyXbr3n2AXR3NIqKhrc82cbju5YkFZtq_zn-6T3NrarE6jNkURzrjnFiRY2ovREC_kx/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbzOz4WvkQ7gDPzIfvBHLRV800CEESD02Fs0ss7tCcHo9R_hF597bYjDSrcRvKvsN65cUw/exec', {
             method: 'POST',
             body: formData
         })
