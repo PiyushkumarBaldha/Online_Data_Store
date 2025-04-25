@@ -519,9 +519,9 @@ function resetPlayNumber() {
         
         // Add basic info
         formData.append('timestamp', afterquizdata.timestamp);
-        formData.append('sessionId', afterquizdata.sessionId);
-        formData.append('playNumber', afterquizdata.playNumber);
-        formData.append('age', afterquizdata.age);
+        formData.append('sessionId', quizData.sessionId);
+        formData.append('playNumber', quizData.playNumber);
+        formData.append('age', quizData.age);
         formData.append('profession', afterquizdata.profession);
         formData.append('status', afterquizdata.status);
         formData.append('score', afterquizdata.score);
