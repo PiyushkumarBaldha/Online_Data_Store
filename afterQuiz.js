@@ -588,5 +588,5 @@ function resetPlayNumber() {
         resetPlayNumber();
         // Clear the form data from localStorage if no longer needed
         localStorage.removeItem('formData');
-        window.location.href = "photo-learning.html";
+        window.location.href = "index.html";
     }
