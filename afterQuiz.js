@@ -371,8 +371,8 @@ function resetPlayNumber() {
                 `).join('')}
                 
                 <div style="margin-top: 20px;">
-                    <button id="final-submit-btn" class="submit-btn">Submit Final Answers</button>
-                </div>
+                <button id="final-submit-btn" class="confidence-btn" style="background-color: #2196F3;">Submit Final Answers</button>
+            </div>
             </div>
         `;
     
