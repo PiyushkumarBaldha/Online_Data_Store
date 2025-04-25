@@ -554,7 +554,7 @@ function resetPlayNumber() {
         return score >= 80 ? "⭐️⭐️⭐️" : score >= 50 ? "⭐️⭐️☆" : "⭐️☆☆";
     }
     
-    // Utility Functions
+    // Utility Function
     function generateSessionId() {
         return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
     }
