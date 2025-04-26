@@ -18,7 +18,7 @@ let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
 let sessionId = generateSessionId();
-let playNumber = getPlayNumber(1);
+let playNumber = getPlayNumber();
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
@@ -89,7 +89,7 @@ function initPlayerData(formData) {
 }
 
 function generatePlayerId() {
-    return 'player_' + Math.random().toString(36).substr(2, 9);
+    return 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
 function getPlayNumber() {
@@ -101,14 +101,13 @@ function getPlayNumber() {
             base: 1,
             increment: 0
         };
+        localStorage.setItem('playNumberData', JSON.stringify(playData));
     } else {
         playData = JSON.parse(playData);
     }
     
     // Format as "base.increment"
-    const currentNumber = `${playData.base}.${playData.increment}`;
-    
-    return currentNumber;
+    return `${playData.base}.${playData.increment}`;
 }
 
 function incrementPlayNumber() {
@@ -266,7 +265,7 @@ function checkAnswer(isReal) {
     
     // Auto-proceed if confidence already selected
     if (currentConfidence !== null) {
-        goToNextQuestion();
+        setTimeout(goToNextQuestion, 300); // Small delay for better UX
     }
 }
 
@@ -279,7 +278,7 @@ function setConfidence(confidence) {
     
     // Auto-proceed if answer already selected
     if (userAnswers[currentQuestionIndex] !== null) {
-        goToNextQuestion();
+        setTimeout(goToNextQuestion, 300); // Small delay for better UX
     }
 }
 
@@ -308,7 +307,7 @@ function goToNextQuestion() {
         } else {
             // All questions answered - enable review button
             document.getElementById("review-btn").disabled = false;
-            // Optionally auto-show review screen:
+            // Show review screen
             showReviewScreen();
         }
     } else {
@@ -386,9 +385,10 @@ function showReviewScreen() {
     });
 
     // Add event listener for the final submit button AFTER it's created
-    document.getElementById('final-submit-btn').addEventListener('click', function() {
-        submitFinalAnswers();
-    });
+    const finalSubmitBtn = document.getElementById('final-submit-btn');
+    if (finalSubmitBtn) {
+        finalSubmitBtn.addEventListener('click', submitFinalAnswers);
+    }
 }
 
 function changeAnswer(index, answer) {
@@ -440,7 +440,7 @@ function endQuiz() {
     });
 
     // Get form data from localStorage
-    const formData = JSON.parse(localStorage.getItem('formData') || {});
+    const formData = JSON.parse(localStorage.getItem('formData') || '{}');
 
     const quizData = {
         timestamp: new Date().toISOString(),
@@ -483,7 +483,7 @@ function endQuiz() {
 // Store quiz data in localStorage
 function storeQuizData(quizData) {
     // Get existing player data
-    const playerData = JSON.parse(localStorage.getItem('playerData')) || {
+    let playerData = JSON.parse(localStorage.getItem('playerData')) || {
         playerId: quizData.playerId,
         scores: [],
         sessions: [],
@@ -513,40 +513,49 @@ function storeQuizData(quizData) {
 }
 
 function sendDataToGoogleSheets(quizData) {
-    // Prepare the data for submission
-    const formData = new URLSearchParams();
-    
-    // Add basic info
-    formData.append('timestamp', quizData.timestamp);
-    formData.append('sessionId', quizData.sessionId);
-    formData.append('playNumber', quizData.playNumber);
-    formData.append('age', quizData.age);
-    formData.append('profession', quizData.profession);
-    formData.append('status', quizData.status);
-    formData.append('score', quizData.score);
-    formData.append('timeTaken', quizData.timeTaken);
-    formData.append('playerId', quizData.playerId);
-    
-    // Add answers and confidence levels
-    for (let i = 0; i < totalQuestions; i++) {
-        formData.append(`q${i+1}_image`, quizData.imageSet[i].path);
-        formData.append(`q${i+1}_answer`, userAnswers[i] || '');
-        formData.append(`q${i+1}_confidence`, userConfidence[i] || '');
-        formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i]) ? '1' : '0');
+    try {
+        // Prepare the data for submission
+        const formData = new URLSearchParams();
+        
+        // Add basic info
+        formData.append('timestamp', quizData.timestamp);
+        formData.append('sessionId', quizData.sessionId);
+        formData.append('playNumber', quizData.playNumber);
+        formData.append('age', quizData.age);
+        formData.append('profession', quizData.profession);
+        formData.append('status', quizData.status);
+        formData.append('score', quizData.score);
+        formData.append('timeTaken', quizData.timeTaken);
+        formData.append('playerId', quizData.playerId);
+        
+        // Add answers and confidence levels
+        for (let i = 0; i < totalQuestions; i++) {
+            formData.append(`q${i+1}_image`, quizData.imageSet[i].path);
+            formData.append(`q${i+1}_answer`, userAnswers[i] || '');
+            formData.append(`q${i+1}_confidence`, userConfidence[i] || '');
+            formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i]) ? '1' : '0');
+        }
+        
+        // Send data to Google Sheets
+        fetch('https://script.google.com/macros/s/AKfycbyXbr3n2AXR3NIqKhrc82cbju5YkFZtq_zn-6T3NrarE6jNkURzrjnFiRY2ovREC_kx/exec', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } catch (error) {
+        console.error('Error in sendDataToGoogleSheets:', error);
     }
-    
-    // Send data to Google Sheets
-    fetch('https://script.google.com/macros/s/AKfycbyXbr3n2AXR3NIqKhrc82cbju5YkFZtq_zn-6T3NrarE6jNkURzrjnFiRY2ovREC_kx/exec', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
 }
 
 function getStarRating() {
