@@ -53,10 +53,16 @@ h1::after {
   border-radius: 2px;
 }
 
+.image-viewer {
+  margin-bottom: 25px;
+}
+
 .image-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 25px;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
 }
 
 .image-container img {
@@ -71,6 +77,33 @@ h1::after {
 .image-container img:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.image-counter {
+  text-align: center;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .learning-options {
@@ -362,5 +395,11 @@ h1::after {
   .back-btn {
     padding: 10px 20px;
     font-size: 14px;
+  }
+  
+  .nav-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1em;
   }
 }

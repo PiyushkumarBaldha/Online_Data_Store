@@ -32,9 +32,40 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
     
-    // Set a random learning image
-    const randomImage = Math.floor(Math.random() * 5) + 1;
-    document.getElementById('featured-image').src = `Img/learning${randomImage}.jpg`;
+    // Image viewer functionality
+    const imageElement = document.getElementById('featured-image');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const counterElement = document.getElementById('image-counter');
+    
+    let currentImageIndex = 1;
+    const totalImages = 8;
+    
+    function updateImage() {
+        imageElement.src = `LearningFakeImage/${currentImageIndex}.jpg`;
+        counterElement.textContent = `${currentImageIndex}/${totalImages}`;
+        
+        // Disable/enable buttons based on current image
+        prevBtn.disabled = currentImageIndex === 1;
+        nextBtn.disabled = currentImageIndex === totalImages;
+    }
+    
+    prevBtn.addEventListener('click', function() {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateImage();
+        }
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        if (currentImageIndex < totalImages) {
+            currentImageIndex++;
+            updateImage();
+        }
+    });
+    
+    // Initialize the image viewer
+    updateImage();
   
     // Track selected cards
     const selectedCards = new Set();
@@ -59,17 +90,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
     // Add event listener to back button
     document.getElementById('back-btn').addEventListener('click', goBack);
-  });
+});
   
-  function getStarRating(score) {
+function getStarRating(score) {
     const fullStars = Math.floor(score / 20);
     const halfStar = score % 20 >= 10 ? 1 : 0;
     const emptyStars = 5 - fullStars - halfStar;
     
     return '⭐'.repeat(fullStars) + '½'.repeat(halfStar) + '☆'.repeat(emptyStars);
-  }
+}
   
-  function showInfo(topic) {
+function showInfo(topic) {
     // Hide all info sections first
     document.querySelectorAll('.info-section').forEach(section => {
         section.style.display = 'none';
@@ -81,15 +112,15 @@ document.addEventListener('DOMContentLoaded', function() {
         infoSection.style.display = 'block';
         infoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
+}
   
-  function goBack() {
+function goBack() {
     window.location.href = 'afterQuiz.html';
-  }
+}
   
-  function playAgain() {
+function playAgain() {
     let attempt = parseInt(localStorage.getItem("attempt") || "1", 10);
     attempt++;
     localStorage.setItem("attempt", attempt);
     window.location.href = "quiz.html";
-  }
+}
