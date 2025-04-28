@@ -53,8 +53,6 @@ document.addEventListener("DOMContentLoaded", function() {
             // Show loading state
             submitBtn.disabled = true;
             window.location.href = "quiz.html";
-        
-        
         }
     });
 });
