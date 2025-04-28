@@ -154,12 +154,12 @@ function initializeImageSet() {
     
     // Create separate arrays for R and F folder images
     const allRImages = Array.from({length: totalImages}, (_, i) => ({
-        path: `${imageFolder}/R/${i+1}.jpg`,
+        path: `${imageFolder}/R/${i+1}.png`,
         answer: "Real"
     }));
     
     const allFImages = Array.from({length: totalImages}, (_, i) => ({
-        path: `${imageFolder}/F/${i+1}.jpg`,
+        path: `${imageFolder}/F/${i+1}.png`,
         answer: "Fake"
     }));
     
