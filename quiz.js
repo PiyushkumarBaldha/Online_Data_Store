@@ -17,17 +17,22 @@ let score = 0;
 let currentQuestionIndex = 0;
 const totalQuestions = 10;
 let imageFolder = "Img"; // Default image folder
-let sessionId = generateSessionId();
+let sessionId = localStorage.getItem('sessionId') || generateSessionId();
 let playNumber = getPlayNumber();
 let userAnswers = new Array(totalQuestions).fill(null);
 let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
 const quizStartTime = Date.now();
-let currentConfidence = null; // Track current confidence selection
+let currentConfidence = null;
 
 // This will store our randomized image paths and their correct answers
 let imageSet = [];
 let correctAnswers = {};
+
+// Store session ID in localStorage if not already set
+if (!localStorage.getItem('sessionId')) {
+    localStorage.setItem('sessionId', sessionId);
+}
 
 // Initialize the quiz when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -72,29 +77,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Initialize player data in localStorage
 function initPlayerData(formData) {
-    if (!localStorage.getItem('playerData')) {
-        const playerData = {
-            playerId: formData.playerId || generatePlayerId(),
-            scores: [],
-            sessions: [],
-            attempts: 0,
-            formData: {
-                age: formData.age || null,
-                profession: formData.profession || null,
-                status: formData.status || null
-            }
-        };
-        localStorage.setItem('playerData', JSON.stringify(playerData));
+    let playerData = JSON.parse(localStorage.getItem('playerData')) || {
+        playerId: localStorage.getItem('playerId') || generatePlayerId(),
+        scores: [],
+        sessions: [],
+        attempts: 0,
+        formData: {
+            age: formData.age || null,
+            profession: formData.profession || null,
+            status: formData.status || null
+        }
+    };
+    
+    // Store playerId in localStorage if not already set
+    if (!localStorage.getItem('playerId')) {
+        localStorage.setItem('playerId', playerData.playerId);
     }
+    
+    localStorage.setItem('playerData', JSON.stringify(playerData));
 }
 
 function generatePlayerId() {
-    return 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    const id = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    localStorage.setItem('playerId', id);
+    return id;
 }
+
+function generateSessionId() {
+    const id = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    localStorage.setItem('sessionId', id);
+    return id;
+}
+
+
+
+
+
 
 function getPlayNumber() {
     let playData = localStorage.getItem('playNumberData');
     
+
     if (!playData) {
         // Initialize with whole number if no data exists
         playData = {
@@ -108,6 +131,7 @@ function getPlayNumber() {
     
     // Format as "base.increment"
     return `${playData.base}.${playData.increment}`;
+    
 }
 
 function incrementPlayNumber() {
@@ -594,6 +618,11 @@ function playAgain() {
 
 function finishGame() {
     resetPlayNumber();
-    // Clear the form data from localStorage if no longer needed
+    /* Clear the form data from localStorage if no longer needed.
+   Just use the line below after the comment, so it will be automatically indented.
+    localStorage.removeItem('playNumberData');
+   
+    */
     window.location.href = "photo-learning.html";
 }
+
