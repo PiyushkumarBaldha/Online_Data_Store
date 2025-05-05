@@ -24,12 +24,13 @@ let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
 const quizStartTime = Date.now();
 let currentConfidence = null;
+const FORCE_PLAY_NUMBER = "3.2";
 
 // This will store our randomized image paths and their correct answers
 let imageSet = [];
 let correctAnswers = {};
 
-// Store session ID in localStorage if not already set
+// Store IDs in localStorage if not already set
 if (!localStorage.getItem('sessionId')) {
     localStorage.setItem('sessionId', sessionId);
 }
@@ -109,17 +110,11 @@ function generateSessionId() {
     return id;
 }
 
-
-
-
-
-
 function getPlayNumber() {
     let playData = localStorage.getItem('playNumberData');
     
-
     if (!playData) {
-        // Initialize with whole number if no data exists
+        // Initialize if no data exists
         playData = {
             base: 1,
             increment: 0
@@ -129,22 +124,15 @@ function getPlayNumber() {
         playData = JSON.parse(playData);
     }
     
-    // Format as "base.increment"
+    // Return current play number
     return `${playData.base}.${playData.increment}`;
-    
 }
 
 function incrementPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
+    let playData = JSON.parse(localStorage.getItem('playNumberData')) || {
+        base: 1,
+        increment: 0
+    };
     
     // Increment the decimal part for "Play Again"
     playData.increment += 1;
@@ -153,23 +141,21 @@ function incrementPlayNumber() {
 }
 
 function resetPlayNumber() {
-    let playData = localStorage.getItem('playNumberData');
-    
-    if (!playData) {
-        playData = {
-            base: 1,
-            increment: 0
-        };
-    } else {
-        playData = JSON.parse(playData);
-    }
+    let playData = JSON.parse(localStorage.getItem('playNumberData')) || {
+        base: 1,
+        increment: 0
+    };
     
     // Increment the whole number and reset decimal for "Finish"
-    playData.base += 1;
+    playData.base += 0;
     playData.increment = 0;
     
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
+
+
+
+
 
 // Initialize the randomized image set with complete shuffling
 function initializeImageSet() {
@@ -620,9 +606,10 @@ function finishGame() {
     resetPlayNumber();
     /* Clear the form data from localStorage if no longer needed.
    Just use the line below after the comment, so it will be automatically indented.
-    localStorage.removeItem('playNumberData');
+    
    
     */
-    window.location.href = "photo-learning.html";
+   localStorage.removeItem('playNumberData');
+   window.location.href = "photo-learning.html";
 }
 
