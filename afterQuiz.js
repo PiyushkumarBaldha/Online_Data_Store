@@ -594,7 +594,11 @@ function playAgain() {
 function finishGame() {
     resetPlayNumber();
     // Clear the form data from localStorage if no longer needed
-    localStorage.removeItem('playNumberData');
+     /* Clear the form data from localStorage if no longer needed.
+   Just use the line below after the comment, so it will be automatically indented.
+   localStorage.removeItem('playNumberData'); 
+   
+    */
     localStorage.removeItem('formData');
     window.location.href = "index.html";
 }
