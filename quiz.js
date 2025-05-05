@@ -479,7 +479,7 @@ function endQuiz() {
             <p>Time Taken: <strong>${Math.floor(timeTaken/60)}m ${timeTaken%60}s</strong></p>
             <div class="stars">${getStarRating()}</div>
             <div class="end-container">
-                <button class="end-btn" id="finish-btn">Finish</button>
+                <button class="end-btn" id="finish-btn">Next</button>
                 <button class="end-btn" id="playagain-btn">Play Again</button>
             </div>
         </div>
