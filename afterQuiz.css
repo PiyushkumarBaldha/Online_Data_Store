@@ -231,6 +231,11 @@ body {
     background: rgba(76, 175, 80, 0.7);
 }
 
+#real-btn.selected {
+    background: rgba(76, 175, 80, 0.9);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
 #real-btn:hover:not(.selected) {
     background: rgba(76, 175, 80, 0.9);
     transform: translateY(-2px);
@@ -238,6 +243,11 @@ body {
 
 #fake-btn {
     background: rgba(255, 152, 0, 0.7);
+}
+
+#fake-btn.selected {
+    background: rgba(255, 152, 0, 0.9);
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
 }
 
 #fake-btn:hover:not(.selected) {
@@ -321,6 +331,23 @@ body {
 #not-confident-btn:hover:not(.selected) {
     background: rgba(244, 67, 54, 0.9);
     transform: translateY(-2px);
+}
+
+/* Next-Button */
+.next-btn {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.next-btn:hover {
+    background-color: #45a049;
 }
 
 /* Review Button */
@@ -444,7 +471,6 @@ body {
     color: rgba(255, 255, 255, 0.9);
     margin: 10px 0;
 }
-
 
 .stars {
     margin: 15px 0;

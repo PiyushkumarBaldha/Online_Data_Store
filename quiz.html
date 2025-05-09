@@ -22,19 +22,21 @@
     </div>
     
     <h3 id="Choose-Ans-h3">Choose your answer</h3>
-    <div class="buttons-container">
+    <div class="buttons-container" id="answer-container">
       <button class="answer-btn" id="real-btn">Real</button>
       <button class="answer-btn" id="fake-btn">Fake</button>
     </div>
 
     <h3 id="confidence-h3">Select your confidence level</h3>
-    <div class="confidence-container">
+    <div class="confidence-container" id="confidence-container">
       <button class="confidence-btn required" id="confident-btn">😊 Confident</button>
       <button class="confidence-btn required" id="not-sure-btn">😐 Not Sure</button>
       <button class="confidence-btn required" id="not-confident-btn">😟 Not Confident</button>
     </div>
     
+    <button class="next-btn" id="next-btn">Next</button>
     <button class="confidence-btn" id="review-btn" disabled>📝 Review Answers</button>
+   
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="quiz.js"></script>

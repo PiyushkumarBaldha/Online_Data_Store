@@ -152,12 +152,6 @@ function resetPlayNumber() {
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
 
-
-
-
-
-
-
 // Initialize the randomized image set with complete shuffling
 function initializeImageSet() {
     // Total number of images available in each folder
@@ -248,11 +242,31 @@ function initializeTimer() {
     updateTimer();
 }
 
+// Update answer button states
+function updateAnswerButtons() {
+    const realBtn = document.getElementById("real-btn");
+    const fakeBtn = document.getElementById("fake-btn");
+    
+    // Remove selected class from both buttons
+    realBtn.classList.remove("selected");
+    fakeBtn.classList.remove("selected");
+    
+    // Add selected class to the button that matches the current answer
+    if (userAnswers[currentQuestionIndex] === "Real") {
+        realBtn.classList.add("selected");
+    } else if (userAnswers[currentQuestionIndex] === "Fake") {
+        fakeBtn.classList.add("selected");
+    }
+}
+
 // Question Handling
 function updateQuestion() {
     setGradientBackground();
     document.getElementById("question-title").textContent = "Question " + (currentQuestionIndex + 1);
     document.getElementById("quiz-image").src = imageSet[currentQuestionIndex].path;
+    
+    // Update answer button states
+    updateAnswerButtons();
     
     // Update confidence button states
     updateConfidenceButtons();
@@ -262,17 +276,24 @@ function checkAnswer(isReal) {
     const answer = isReal ? "Real" : "Fake";
     userAnswers[currentQuestionIndex] = answer;
     
+    // Update button states
+    updateAnswerButtons();
+    
     // Update score
     score = 0;
     userAnswers.forEach((ans, index) => {
-        if (ans === correctAnswers[index]) {
+        if (ans === correctAnswers[index] && userConfidence[index] !== null) {
             score += 10;
         }
     });
     
     updateScore();
-    markAnswered(currentQuestionIndex);
-    updateProgress();
+    
+    // Only mark as answered and update progress if confidence is also selected
+    if (userConfidence[currentQuestionIndex] !== null) {
+        markAnswered(currentQuestionIndex);
+        updateProgress();
+    }
     
     // Auto-proceed if confidence already selected
     if (currentConfidence !== null) {
@@ -286,6 +307,22 @@ function setConfidence(confidence) {
     
     // Update button states
     updateConfidenceButtons();
+    
+    // Update score
+    score = 0;
+    userAnswers.forEach((ans, index) => {
+        if (ans === correctAnswers[index] && userConfidence[index] !== null) {
+            score += 10;
+        }
+    });
+    
+    updateScore();
+    
+    // Only mark as answered and update progress if answer is also selected
+    if (userAnswers[currentQuestionIndex] !== null) {
+        markAnswered(currentQuestionIndex);
+        updateProgress();
+    }
     
     // Auto-proceed if answer already selected
     if (userAnswers[currentQuestionIndex] !== null) {
@@ -329,10 +366,10 @@ function goToNextQuestion() {
 
 function findNextUnanswered(current) {
     for (let i = current + 1; i < totalQuestions; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
     for (let i = 0; i < current; i++) {
-        if (userAnswers[i] === null) return i;
+        if (userAnswers[i] === null || userConfidence[i] === null) return i;
     }
     return -1;
 }
@@ -341,13 +378,21 @@ function markAnswered(index) {
     const navButtons = document.querySelectorAll(".nav-btn");
     const button = navButtons[index];
     
-    // Remove all classes and just add 'answered' to turn it blue
-    button.classList.remove("correct", "incorrect");
-    button.classList.add("answered");
+    // Only mark as answered if both answer and confidence are selected
+    if (userAnswers[index] !== null && userConfidence[index] !== null) {
+        button.classList.remove("correct", "incorrect");
+        button.classList.add("answered");
+    }
 }
 
 function updateProgress() {
-    let answeredCount = userAnswers.filter(answer => answer !== null).length;
+    let answeredCount = 0;
+    for (let i = 0; i < totalQuestions; i++) {
+        if (userAnswers[i] !== null && userConfidence[i] !== null) {
+            answeredCount++;
+        }
+    }
+    
     const progress = (answeredCount / totalQuestions) * 100;
     document.getElementById("progress-bar-filled").style.width = progress + "%";
     document.getElementById("progress-bar-filled").textContent = Math.round(progress) + "%";
@@ -411,7 +456,7 @@ function changeAnswer(index, answer) {
     // Recalculate score
     score = 0;
     userAnswers.forEach((ans, i) => {
-        if (ans === correctAnswers[i]) {
+        if (ans === correctAnswers[i] && userConfidence[i] !== null) {
             score += 10;
         }
     });
@@ -421,7 +466,7 @@ function submitFinalAnswers() {
     // Calculate final score
     score = 0;
     imageSet.forEach((img, index) => {
-        if (userAnswers[index] === correctAnswers[index]) {
+        if (userAnswers[index] === correctAnswers[index] && userConfidence[index] !== null) {
             score += 10;
         }
     });
@@ -443,7 +488,7 @@ function endQuiz() {
             imagePath: img.path,
             answer: userAnswers[index],
             confidence: userConfidence[index],
-            correct: userAnswers[index] === correctAnswers[index]
+            correct: userAnswers[index] === correctAnswers[index] && userConfidence[index] !== null
         };
     });
 
@@ -540,7 +585,7 @@ function sendDataToGoogleSheets(quizData) {
         formData.append(`q${i+1}_image`, quizData.imageSet[i].path);
         formData.append(`q${i+1}_answer`, userAnswers[i] || '');
         formData.append(`q${i+1}_confidence`, userConfidence[i] || '');
-        formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i]) ? '1' : '0');
+        formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i] && userConfidence[i] !== null) ? '1' : '0');
     }
     
     // Send data to Google Sheets
