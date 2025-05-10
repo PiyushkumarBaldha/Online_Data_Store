@@ -75,6 +75,33 @@ document.addEventListener("DOMContentLoaded", function () {
     initPlayerData(formData);
 });
 
+// Highlight required containers function
+function highlightRequiredContainers() {
+    // Remove any existing highlights
+    document.querySelector(".buttons-container").classList.remove("highlight-required");
+    document.querySelector(".confidence-container").classList.remove("highlight-required");
+    
+    const answerSelected = userAnswers[currentQuestionIndex] !== null;
+    const confidenceSelected = userConfidence[currentQuestionIndex] !== null;
+    
+    if (!answerSelected && !confidenceSelected) {
+        // Highlight both containers if nothing is selected
+        document.querySelector(".buttons-container").classList.add("highlight-required");
+        document.querySelector(".confidence-container").classList.add("highlight-required");
+        return false;
+    } else if (!answerSelected) {
+        // Highlight only answer container
+        document.querySelector(".buttons-container").classList.add("highlight-required");
+        return false;
+    } else if (!confidenceSelected) {
+        // Highlight only confidence container
+        document.querySelector(".confidence-container").classList.add("highlight-required");
+        return false;
+    }
+    
+    return true; // Both are selected
+}
+
 // Initialize player data in localStorage
 function initPlayerData(formData) {
     let playerData = JSON.parse(localStorage.getItem('playerData')) || {
@@ -89,7 +116,6 @@ function initPlayerData(formData) {
         }
     };
     
-    // Store playerId in localStorage if not already set
     if (!localStorage.getItem('playerId')) {
         localStorage.setItem('playerId', playerData.playerId);
     }
@@ -104,16 +130,13 @@ function generatePlayerId() {
 }
 
 function generateSessionId() {
-    const id = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-    localStorage.setItem('sessionId', id);
-    return id;
+    return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 }
 
 function getPlayNumber() {
     let playData = localStorage.getItem('playNumberData');
     
     if (!playData) {
-        // Initialize if no data exists
         playData = {
             base: 1,
             increment: 0
@@ -123,7 +146,6 @@ function getPlayNumber() {
         playData = JSON.parse(playData);
     }
     
-    // Return current play number
     return `${playData.base}.${playData.increment}`;
 }
 
@@ -133,9 +155,7 @@ function incrementPlayNumber() {
         increment: 0
     };
     
-    // Increment the decimal part for "Play Again"
     playData.increment += 1;
-    
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
 
@@ -145,19 +165,15 @@ function resetPlayNumber() {
         increment: 0
     };
     
-    // Increment the whole number and reset decimal for "Finish"
     playData.base += 1;
     playData.increment = 0;
-    
     localStorage.setItem('playNumberData', JSON.stringify(playData));
 }
 
-// Initialize the randomized image set with complete shuffling
+// Initialize the randomized image set
 function initializeImageSet() {
-    // Total number of images available in each folder
     const totalImages = 50;
     
-    // Create separate arrays for R and F folder images
     const allRImages = Array.from({length: totalImages}, (_, i) => ({
         path: `${imageFolder}/R/${i+1}.png`,
         answer: "Real"
@@ -168,29 +184,20 @@ function initializeImageSet() {
         answer: "Fake"
     }));
     
-    // Shuffle both sets separately
     shuffleArray(allRImages);
     shuffleArray(allFImages);
     
-    // Take first 5 from each shuffled set
     const selectedR = allRImages.slice(0, 5);
     const selectedF = allFImages.slice(0, 5);
     
-    // Combine all selected images
     imageSet = [...selectedR, ...selectedF];
-    
-    // Shuffle the combined set again for final randomness
     shuffleArray(imageSet);
     
-    // Create correct answers mapping
     imageSet.forEach((img, index) => {
         correctAnswers[index] = img.answer;
     });
-    
-    console.log("Selected images:", imageSet); // For debugging
 }
 
-// Fisher-Yates shuffle algorithm for complete randomization
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -214,7 +221,7 @@ function createNavigation() {
 
 function goToQuestion(index) {
     currentQuestionIndex = index;
-    currentConfidence = userConfidence[index]; // Load confidence for this question
+    currentConfidence = userConfidence[index];
     updateQuestion();
 }
 
@@ -247,15 +254,17 @@ function updateAnswerButtons() {
     const realBtn = document.getElementById("real-btn");
     const fakeBtn = document.getElementById("fake-btn");
     
-    // Remove selected class from both buttons
     realBtn.classList.remove("selected");
     fakeBtn.classList.remove("selected");
     
-    // Add selected class to the button that matches the current answer
     if (userAnswers[currentQuestionIndex] === "Real") {
         realBtn.classList.add("selected");
     } else if (userAnswers[currentQuestionIndex] === "Fake") {
         fakeBtn.classList.add("selected");
+    }
+    
+    if (userAnswers[currentQuestionIndex] !== null) {
+        document.querySelector(".buttons-container").classList.remove("highlight-required");
     }
 }
 
@@ -265,21 +274,18 @@ function updateQuestion() {
     document.getElementById("question-title").textContent = "Question " + (currentQuestionIndex + 1);
     document.getElementById("quiz-image").src = imageSet[currentQuestionIndex].path;
     
-    // Update answer button states
     updateAnswerButtons();
-    
-    // Update confidence button states
     updateConfidenceButtons();
+    updateProgress();
 }
 
 function checkAnswer(isReal) {
     const answer = isReal ? "Real" : "Fake";
     userAnswers[currentQuestionIndex] = answer;
     
-    // Update button states
     updateAnswerButtons();
+    document.querySelector(".buttons-container").classList.remove("highlight-required");
     
-    // Update score
     score = 0;
     userAnswers.forEach((ans, index) => {
         if (ans === correctAnswers[index] && userConfidence[index] !== null) {
@@ -289,15 +295,13 @@ function checkAnswer(isReal) {
     
     updateScore();
     
-    // Only mark as answered and update progress if confidence is also selected
     if (userConfidence[currentQuestionIndex] !== null) {
         markAnswered(currentQuestionIndex);
         updateProgress();
     }
     
-    // Auto-proceed if confidence already selected
     if (currentConfidence !== null) {
-        goToNextQuestion();
+        setTimeout(goToNextQuestion, 300);
     }
 }
 
@@ -305,10 +309,9 @@ function setConfidence(confidence) {
     currentConfidence = confidence;
     userConfidence[currentQuestionIndex] = confidence;
     
-    // Update button states
     updateConfidenceButtons();
+    document.querySelector(".confidence-container").classList.remove("highlight-required");
     
-    // Update score
     score = 0;
     userAnswers.forEach((ans, index) => {
         if (ans === correctAnswers[index] && userConfidence[index] !== null) {
@@ -318,15 +321,13 @@ function setConfidence(confidence) {
     
     updateScore();
     
-    // Only mark as answered and update progress if answer is also selected
     if (userAnswers[currentQuestionIndex] !== null) {
         markAnswered(currentQuestionIndex);
         updateProgress();
     }
     
-    // Auto-proceed if answer already selected
     if (userAnswers[currentQuestionIndex] !== null) {
-        goToNextQuestion();
+        setTimeout(goToNextQuestion, 300);
     }
 }
 
@@ -341,26 +342,26 @@ function updateConfidenceButtons() {
     } else if (currentConfidence === "Not Confident") {
         document.getElementById("not-confident-btn").classList.add("selected");
     }
+    
+    if (userConfidence[currentQuestionIndex] !== null) {
+        document.querySelector(".confidence-container").classList.remove("highlight-required");
+    }
 }
 
 function goToNextQuestion() {
-    // First check if we have both answer and confidence
-    if (userAnswers[currentQuestionIndex] !== null && userConfidence[currentQuestionIndex] !== null) {
-        let nextIndex = findNextUnanswered(currentQuestionIndex);
-        
-        if (nextIndex !== -1) {
-            currentQuestionIndex = nextIndex;
-            currentConfidence = userConfidence[nextIndex];
-            updateQuestion();
-        } else {
-            // All questions answered - enable review button
-            document.getElementById("review-btn").disabled = false;
-            // Optionally auto-show review screen:
-            showReviewScreen();
-        }
+    if (!highlightRequiredContainers()) {
+        return;
+    }
+    
+    let nextIndex = findNextUnanswered(currentQuestionIndex);
+    
+    if (nextIndex !== -1) {
+        currentQuestionIndex = nextIndex;
+        currentConfidence = userConfidence[nextIndex];
+        updateQuestion();
     } else {
-        // Show alert if missing answer or confidence
-        alert("Please select both an answer and confidence level before proceeding.");
+        document.getElementById("review-btn").disabled = false;
+        showReviewScreen();
     }
 }
 
@@ -378,7 +379,6 @@ function markAnswered(index) {
     const navButtons = document.querySelectorAll(".nav-btn");
     const button = navButtons[index];
     
-    // Only mark as answered if both answer and confidence are selected
     if (userAnswers[index] !== null && userConfidence[index] !== null) {
         button.classList.remove("correct", "incorrect");
         button.classList.add("answered");
@@ -426,12 +426,11 @@ function showReviewScreen() {
             `).join('')}
             
             <div style="margin-top: 20px;">
-            <button id="final-submit-btn" class="confidence-btn" style="background-color: #2196F3;">Submit Final Answers</button>
-        </div>
+                <button id="final-submit-btn" class="confidence-btn" style="background-color: #2196F3;">Submit Final Answers</button>
+            </div>
         </div>
     `;
 
-    // Add event listeners to the dynamically created buttons
     document.querySelectorAll('.review-change-btn').forEach(button => {
         button.addEventListener('click', function() {
             const index = parseInt(this.getAttribute('data-index'));
@@ -440,20 +439,17 @@ function showReviewScreen() {
         });
     });
 
-    // Add event listener for the final submit button
     document.getElementById('final-submit-btn').addEventListener('click', submitFinalAnswers);
 }
 
 function changeAnswer(index, answer) {
     userAnswers[index] = answer;
     
-    // Update the display
     const answerElements = document.querySelectorAll('.review-answer');
     if (answerElements[index]) {
         answerElements[index].textContent = `Your answer: ${answer} (${userConfidence[index] || "No confidence level"})`;
     }
     
-    // Recalculate score
     score = 0;
     userAnswers.forEach((ans, i) => {
         if (ans === correctAnswers[i] && userConfidence[i] !== null) {
@@ -463,7 +459,6 @@ function changeAnswer(index, answer) {
 }
 
 function submitFinalAnswers() {
-    // Calculate final score
     score = 0;
     imageSet.forEach((img, index) => {
         if (userAnswers[index] === correctAnswers[index] && userConfidence[index] !== null) {
@@ -471,7 +466,6 @@ function submitFinalAnswers() {
         }
     });
     
-    // End the quiz
     endQuiz();
 }
 
@@ -481,7 +475,6 @@ function endQuiz() {
     const quizEndTime = Date.now();
     const timeTaken = Math.floor((quizEndTime - quizStartTime) / 1000);
     
-    // Prepare the answers for reporting
     const answersReport = {};
     imageSet.forEach((img, index) => {
         answersReport[index] = {
@@ -492,7 +485,6 @@ function endQuiz() {
         };
     });
 
-    // Get form data from localStorage
     const formData = JSON.parse(localStorage.getItem('formData') || '{}');
 
     const quizData = {
@@ -509,10 +501,7 @@ function endQuiz() {
         playerId: formData.playerId || generatePlayerId()
     };
 
-    // Store quiz data in localStorage
     storeQuizData(quizData);
-    
-    // Send data to Google Sheets
     sendDataToGoogleSheets(quizData);
 
     document.querySelector(".quiz-container").innerHTML = `
@@ -528,14 +517,11 @@ function endQuiz() {
         </div>
     `;
 
-    // Add event listeners to the new buttons
     document.getElementById('finish-btn').addEventListener('click', finishGame);
     document.getElementById('playagain-btn').addEventListener('click', playAgain);
 }
 
-// Store quiz data in localStorage
 function storeQuizData(quizData) {
-    // Get existing player data
     const playerData = JSON.parse(localStorage.getItem('playerData')) || {
         playerId: quizData.playerId,
         scores: [],
@@ -548,7 +534,6 @@ function storeQuizData(quizData) {
         }
     };
     
-    // Update player data with new quiz results
     playerData.scores.push(quizData.score);
     playerData.sessions.push({
         sessionId: quizData.sessionId,
@@ -558,18 +543,13 @@ function storeQuizData(quizData) {
     });
     playerData.attempts = (playerData.attempts || 0) + 1;
     
-    // Save updated player data
     localStorage.setItem('playerData', JSON.stringify(playerData));
-    
-    // Also store the complete quiz data separately
     localStorage.setItem('quizPerformance', JSON.stringify(quizData));
 }
 
 function sendDataToGoogleSheets(quizData) {
-    // Prepare the data for submission
     const formData = new URLSearchParams();
     
-    // Add basic info
     formData.append('timestamp', quizData.timestamp);
     formData.append('sessionId', quizData.sessionId);
     formData.append('playNumber', quizData.playNumber);
@@ -580,7 +560,6 @@ function sendDataToGoogleSheets(quizData) {
     formData.append('timeTaken', quizData.timeTaken);
     formData.append('playerId', quizData.playerId);
     
-    // Add answers and confidence levels
     for (let i = 0; i < totalQuestions; i++) {
         formData.append(`q${i+1}_image`, quizData.imageSet[i].path);
         formData.append(`q${i+1}_answer`, userAnswers[i] || '');
@@ -588,7 +567,6 @@ function sendDataToGoogleSheets(quizData) {
         formData.append(`q${i+1}_correct`, (userAnswers[i] === correctAnswers[i] && userConfidence[i] !== null) ? '1' : '0');
     }
     
-    // Send data to Google Sheets
     fetch('https://script.google.com/macros/s/AKfycbzOz4WvkQ7gDPzIfvBHLRV800CEESD02Fs0ss7tCcHo9R_hF597bYjDSrcRvKvsN65cUw/exec', {
         method: 'POST',
         body: formData
@@ -606,11 +584,6 @@ function getStarRating() {
     return score >= 80 ? "⭐️⭐️⭐️" : score >= 50 ? "⭐️⭐️☆" : "⭐️☆☆";
 }
 
-// Utility Function
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-}
-
 function setGradientBackground() {
     const randomIndex = Math.floor(Math.random() * colors.length);
     const gradient = `linear-gradient(to bottom, ${colors[randomIndex][0]}, ${colors[randomIndex][1]})`;
@@ -626,6 +599,7 @@ function setupEventListeners() {
     document.getElementById("not-confident-btn").addEventListener("click", () => setConfidence("Not Confident"));
     
     document.getElementById("review-btn").addEventListener("click", showReviewScreen);
+    document.getElementById("next-btn").addEventListener("click", goToNextQuestion);
 }
 
 function playAgain() {
@@ -638,12 +612,6 @@ function playAgain() {
 
 function finishGame() {
     resetPlayNumber();
-    // Clear the form data from localStorage if no longer needed
-     /* Clear the form data from localStorage if no longer needed.
-   Just use the line below after the comment, so it will be automatically indented.
-   localStorage.removeItem('playNumberData'); 
-   
-    */
     localStorage.removeItem('formData');
     window.location.href = "index.html";
 }

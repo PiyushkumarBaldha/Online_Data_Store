@@ -227,7 +227,15 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* For in answer container */
+#answer-container.highlight-required,
+#confidence-container.highlight-required {
+    border: 3px solid red;
+    border-radius: 8px;
+    animation: pulse-border 1s infinite;
+    padding: 5px;
+}
+
+/* For in answer container 
 .answer-container.highlight-required {
     border: 3px solid red;
     border-radius: 10px;
@@ -239,6 +247,7 @@ body {
     border-radius: 10px;
     animation: pulse-border 1s infinite;
 }
+*/
 
 @keyframes pulse-border {
     0% { border-color: rgba(255, 0, 0, 0.7); }

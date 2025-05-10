@@ -312,8 +312,9 @@ function checkAnswer(isReal) {
     const answer = isReal ? "Real" : "Fake";
     userAnswers[currentQuestionIndex] = answer;
     
-    // Update button states
+    // Update button states and remove highlight
     updateAnswerButtons();
+    document.getElementById("answer-container").classList.remove("highlight-required");
     
     // Update score
     score = 0;
@@ -341,8 +342,9 @@ function setConfidence(confidence) {
     currentConfidence = confidence;
     userConfidence[currentQuestionIndex] = confidence;
     
-    // Update button states
+    // Update button states and remove highlight
     updateConfidenceButtons();
+    document.getElementById("confidence-container").classList.remove("highlight-required");
     
     // Update score
     score = 0;
