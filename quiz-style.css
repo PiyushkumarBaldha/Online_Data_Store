@@ -227,6 +227,25 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+/* For in answer container */
+.answer-container.highlight-required {
+    border: 3px solid red;
+    border-radius: 10px;
+    animation: pulse-border 1s infinite;
+}
+
+.confidence-container.highlight-required {
+    border: 3px solid red;
+    border-radius: 10px;
+    animation: pulse-border 1s infinite;
+}
+
+@keyframes pulse-border {
+    0% { border-color: rgba(255, 0, 0, 0.7); }
+    50% { border-color: rgba(255, 0, 0, 1); }
+    100% { border-color: rgba(255, 0, 0, 0.7); }
+}
+
 #real-btn {
     background: rgba(76, 175, 80, 0.7);
 }

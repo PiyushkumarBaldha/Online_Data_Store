@@ -76,6 +76,33 @@ document.addEventListener("DOMContentLoaded", function () {
     initPlayerData(formData);
 });
 
+// Highlight required containers function
+function highlightRequiredContainers() {
+    // Remove any existing highlights
+    document.getElementById("answer-container").classList.remove("highlight-required");
+    document.getElementById("confidence-container").classList.remove("highlight-required");
+    
+    const answerSelected = userAnswers[currentQuestionIndex] !== null;
+    const confidenceSelected = userConfidence[currentQuestionIndex] !== null;
+    
+    if (!answerSelected && !confidenceSelected) {
+        // Highlight both containers if nothing is selected
+        document.getElementById("answer-container").classList.add("highlight-required");
+        document.getElementById("confidence-container").classList.add("highlight-required");
+        return false;
+    } else if (!answerSelected) {
+        // Highlight only answer container
+        document.getElementById("answer-container").classList.add("highlight-required");
+        return false;
+    } else if (!confidenceSelected) {
+        // Highlight only confidence container
+        document.getElementById("confidence-container").classList.add("highlight-required");
+        return false;
+    }
+    
+    return true; // Both are selected
+}
+
 // Initialize player data in localStorage
 function initPlayerData(formData) {
     let playerData = JSON.parse(localStorage.getItem('playerData')) || {
@@ -258,6 +285,11 @@ function updateAnswerButtons() {
     } else if (userAnswers[currentQuestionIndex] === "Fake") {
         fakeBtn.classList.add("selected");
     }
+    
+    // Remove highlight if answer is selected
+    if (userAnswers[currentQuestionIndex] !== null) {
+        document.getElementById("answer-container").classList.remove("highlight-required");
+    }
 }
 
 // Question Handling
@@ -345,26 +377,31 @@ function updateConfidenceButtons() {
     } else if (currentConfidence === "Not Confident") {
         document.getElementById("not-confident-btn").classList.add("selected");
     }
+    
+    // Remove highlight if confidence is selected
+    if (userConfidence[currentQuestionIndex] !== null) {
+        document.getElementById("confidence-container").classList.remove("highlight-required");
+    }
 }
 
 function goToNextQuestion() {
     // First check if we have both answer and confidence
-    if (userAnswers[currentQuestionIndex] !== null && userConfidence[currentQuestionIndex] !== null) {
-        let nextIndex = findNextUnanswered(currentQuestionIndex);
-        
-        if (nextIndex !== -1) {
-            currentQuestionIndex = nextIndex;
-            currentConfidence = userConfidence[nextIndex];
-            updateQuestion();
-        } else {
-            // All questions answered - enable review button
-            document.getElementById("review-btn").disabled = false;
-            // Show review screen
-            showReviewScreen();
-        }
+    if (!highlightRequiredContainers()) {
+        // If highlighting was applied (meaning selections are missing), don't proceed
+        return;
+    }
+    
+    let nextIndex = findNextUnanswered(currentQuestionIndex);
+    
+    if (nextIndex !== -1) {
+        currentQuestionIndex = nextIndex;
+        currentConfidence = userConfidence[nextIndex];
+        updateQuestion();
     } else {
-        // Show alert if missing answer or confidence
-        alert("Please select both an answer and confidence level before proceeding.");
+        // All questions answered - enable review button
+        document.getElementById("review-btn").disabled = false;
+        // Show review screen
+        showReviewScreen();
     }
 }
 
@@ -644,6 +681,7 @@ function setupEventListeners() {
     document.getElementById("not-confident-btn").addEventListener("click", () => setConfidence("Not Confident"));
     
     document.getElementById("review-btn").addEventListener("click", showReviewScreen);
+    document.getElementById("next-btn").addEventListener("click", goToNextQuestion);
 }
 
 function playAgain() {
@@ -656,11 +694,6 @@ function playAgain() {
 
 function finishGame() {
     resetPlayNumber();
-    /* Clear the form data from localStorage if no longer needed.
-   Just use the line below after the comment, so it will be automatically indented.
-   localStorage.removeItem('playNumberData'); 
-   
-    */
-   
-   window.location.href = "photo-learning.html";
+    localStorage.removeItem('playNumberData'); 
+    window.location.href = "photo-learning.html";
 }
