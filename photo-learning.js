@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const counterElement = document.getElementById('image-counter');
     
     let currentImageIndex = 1;
-    const totalImages = 8;
+    const totalImages = 12;
     
     function updateImage() {
         imageElement.src = `LearningFakeImage/${currentImageIndex}.jpg`;

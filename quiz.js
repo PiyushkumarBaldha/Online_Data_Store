@@ -695,7 +695,7 @@ function playAgain() {
 }
 
 function finishGame() {
-    resetPlayNumber();
-    localStorage.removeItem('playNumberData'); 
+
+    resetPlayNumber()
     window.location.href = "photo-learning.html";
 }
