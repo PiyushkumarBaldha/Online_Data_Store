@@ -24,7 +24,6 @@ let userConfidence = new Array(totalQuestions).fill(null);
 let timerInterval;
 const quizStartTime = Date.now();
 let currentConfidence = null;
-const FORCE_PLAY_NUMBER = "3.2";
 
 // This will store our randomized image paths and their correct answers
 let imageSet = [];
@@ -183,7 +182,7 @@ function resetPlayNumber() {
 // Initialize the randomized image set with complete shuffling
 function initializeImageSet() {
     // Total number of images available in each folder
-    const totalImages = 50;
+    const totalImages = 200;
     
     // Create separate arrays for R and F folder images
     const allRImages = Array.from({length: totalImages}, (_, i) => ({

@@ -172,7 +172,7 @@ function resetPlayNumber() {
 
 // Initialize the randomized image set
 function initializeImageSet() {
-    const totalImages = 50;
+    const totalImages = 200;
     
     const allRImages = Array.from({length: totalImages}, (_, i) => ({
         path: `${imageFolder}/R/${i+1}.png`,
